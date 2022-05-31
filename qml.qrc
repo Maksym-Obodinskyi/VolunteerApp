@@ -14,5 +14,7 @@
         <file>AddRequestPopup.qml</file>
         <file>VTextInput.qml</file>
         <file>VButton.qml</file>
+        <file>SingInWindow.qml</file>
+        <file>CreateAccWin.qml</file>
     </qresource>
 </RCC>
