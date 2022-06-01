@@ -6,6 +6,7 @@ import QtQuick.Controls 2.3
 import QtPositioning 5.15
 
 import "resources/Constants"
+import request_manager 1.0
 
 ApplicationWindow {
     id: mainWindow
@@ -182,6 +183,7 @@ ApplicationWindow {
                     }
 
                     onClicked: {
+                        RequestManager.getLastViewedList()
                         requestsListRect.open()
                     }
                 }
@@ -199,6 +201,7 @@ ApplicationWindow {
                     }
 
                     onClicked: {
+                        RequestManager.getFavoritesList();
                         requestsListRect.open()
                     }
                 }
@@ -447,5 +450,9 @@ ApplicationWindow {
             border.color: "transparent"
             border.width: 0
         }
+    }
+
+    Component.onCompleted: {
+        RequestManager.getRequests()
     }
 }
