@@ -1,8 +1,9 @@
-#define LOG_LEVEL TRACE_LEVEL
+#define LOG_LEVEL _TRACE_
 #define LOG_CATEGORY "RequestController"
 #include "Logger.h"
-#include "RequestController.h"
 
+#include "RequestController.h"
+#include "SessionManager.h"
 
 RequestController::RequestController()
 {
@@ -38,7 +39,14 @@ void RequestController::getFavoritesList()
 {
     TRACE();
 }
+
 void RequestController::getLastViewedList()
 {
     TRACE();
+}
+
+void RequestController::getUsersRequests()
+{
+    TRACE();
+    SessionManager::instance().getUsersRequests();
 }

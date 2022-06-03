@@ -13,5 +13,6 @@ public:
     void getByFilter();
     void getFavoritesList();
     void getLastViewedList();
+    void getUsersRequests();
 };
 #endif // REQUESTCONTROLLER_H

@@ -3,12 +3,15 @@
 
 #include <QLocale>
 #include <QTranslator>
+#include <iostream>
 
 #include "RequestManager.h"
+#include "RequestModel.h"
 
 int main(int argc, char *argv[])
 {
   RequestManager::declareInQML();
+  RequestModel::declareInQML();
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);

@@ -1,5 +1,5 @@
 #define LOG_CATEGORY "RequestManager"
-#define LOG_LEVEL TRACE_LEVEL
+#define LOG_LEVEL _TRACE_
 #include "Logger.h"
 
 #include <QQmlEngine>
@@ -18,7 +18,7 @@ void RequestManager::getRequests()
     _contr.getRequests();
 }
 
-void RequestManager::addToFavorites()
+void RequestManager::addToFavorites(const Request & request)
 {
     TRACE();
     _contr.addToFavorites();
@@ -30,13 +30,13 @@ void RequestManager::editRequest()
     _contr.editRequest();
 }
 
-void RequestManager::addRequests()
+void RequestManager::addRequest(const Request & request)
 {
     TRACE();
     _contr.addRequests();
 }
 
-void RequestManager::getByFilter()
+void RequestManager::getByFilter(const std::set<const std::string &> & categories)
 {
     TRACE();
     _contr.getByFilter();
@@ -53,6 +53,16 @@ void RequestManager::getLastViewedList()
     _contr.getLastViewedList();
 }
 
+void RequestManager::getUsersRequests()
+{
+    TRACE();
+    _contr.getUsersRequests();
+}
+
+RequestController & RequestManager::getContr()
+{
+    return _contr;
+}
 
 void RequestManager::declareInQML()
 {

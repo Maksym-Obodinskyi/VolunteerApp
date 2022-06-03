@@ -9,7 +9,8 @@ SOURCES += \
         RequestController.cpp \
         RequestManager.cpp \
         RequestModel.cpp \
-        RequestView.cpp \
+        SessionManager.cpp \
+        User.cpp \
         main.cpp
 
 RESOURCES += qml.qrc
@@ -18,6 +19,8 @@ TRANSLATIONS += \
     VolunteerApp_en_US.ts
 CONFIG += lrelease
 CONFIG += embed_translations
+
+QMAKE_CXXFLAGS += -std=c++20
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -38,4 +41,7 @@ HEADERS += \
     RequestController.h \
     RequestManager.h \
     RequestModel.h \
-    RequestView.h
+    SessionManager.h \
+    User.h
+
+PKGCONFIG += fmt

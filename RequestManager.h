@@ -6,7 +6,6 @@
 
 #include "RequestController.h"
 #include "RequestModel.h"
-#include "RequestView.h"
 
 class RequestManager : public QObject
 {
@@ -18,12 +17,15 @@ public:
     static RequestManager& instance();
 
     Q_INVOKABLE void getRequests();
-    Q_INVOKABLE void addToFavorites();
+    Q_INVOKABLE void addToFavorites(const Request & request);
     Q_INVOKABLE void editRequest();
-    Q_INVOKABLE void addRequests();
-    Q_INVOKABLE void getByFilter();
+    Q_INVOKABLE void addRequest(const Request & request);
+    Q_INVOKABLE void getByFilter(const std::set<const std::string &> & categories);
     Q_INVOKABLE void getFavoritesList();
     Q_INVOKABLE void getLastViewedList();
+    Q_INVOKABLE void getUsersRequests();
+
+    RequestController & getContr();
 private:
     RequestManager();
     RequestManager(const RequestManager &) = delete;

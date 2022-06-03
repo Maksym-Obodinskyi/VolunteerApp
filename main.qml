@@ -7,6 +7,7 @@ import QtPositioning 5.15
 
 import "resources/Constants"
 import request_manager 1.0
+import request_model 1.0
 
 ApplicationWindow {
     id: mainWindow
@@ -87,77 +88,93 @@ ApplicationWindow {
     Popup {
         id: menu
 
-        width: 350
-        height: mainWindow.height
         modal: true
+        width: requestsListRect.width + menuVertDel.width + menuRectangle.width
+        height: mainWindow.height
 
-        contentItem: Rectangle {
-            id: menuRectangle
+        contentItem: Item {
+            id: menuItem
 
-            color: mainWindow.genIntColor
-            anchors.fill: parent
+            width: parent.width
+            anchors {
+                left: parent.left
+                top: parent.top
+                bottom: parent.bottom
+            }
 
-            Item {
-                id: topPanel
+            Rectangle {
+                id: menuRectangle
 
-                property int panelLeftMargin: 20
-
-                height: 230
-
+                color: mainWindow.genIntColor
                 anchors {
-                    top: parent.top
                     left: parent.left
-                    right: parent.right
+                    top: parent.top
+                    bottom: parent.bottom
                 }
 
-                UserPhoto {
-                    id: userMenuPhoto
+                width: 350
+
+                Item {
+                    id: topPanel
+
+                    property int panelLeftMargin: 20
+
+                    height: 230
 
                     anchors {
                         top: parent.top
                         left: parent.left
-                        topMargin: topPanel.panelLeftMargin
-                        leftMargin: topPanel.panelLeftMargin
+                        right: parent.right
+                    }
+
+                    UserPhoto {
+                        id: userMenuPhoto
+
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            topMargin: topPanel.panelLeftMargin
+                            leftMargin: topPanel.panelLeftMargin
+                        }
+                    }
+
+                    Text {
+                        id: menuUserName
+
+                        text: mainWindow.userName
+
+                        anchors {
+                            top: userMenuPhoto.bottom
+                            left: parent.left
+                            topMargin: 20
+                            leftMargin: topPanel.panelLeftMargin
+                        }
+                    }
+
+                    Text {
+                        id: menuUserNumber
+
+                        text: mainWindow.userNumber
+
+                        anchors {
+                            top: menuUserName.bottom
+                            left: parent.left
+                            topMargin: 20
+                            leftMargin: topPanel.panelLeftMargin
+                        }
                     }
                 }
 
-                Text {
-                    id: menuUserName
-
-                    text: mainWindow.userName
-
+                DelimiterLine {
+                    id: panelDel
                     anchors {
-                        top: userMenuPhoto.bottom
                         left: parent.left
-                        topMargin: 20
-                        leftMargin: topPanel.panelLeftMargin
+                        right: parent.right
+                        top: topPanel.bottom
                     }
                 }
 
-                Text {
-                    id: menuUserNumber
-
-                    text: mainWindow.userNumber
-
-                    anchors {
-                        top: menuUserName.bottom
-                        left: parent.left
-                        topMargin: 20
-                        leftMargin: topPanel.panelLeftMargin
-                    }
-                }
-            }
-
-            DelimiterLine {
-                id: panelDel
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: topPanel.bottom
-                }
-            }
-
-            Item {
+                Item {
                 id: bottomPanel
 
                 property int btnHeight: 50
@@ -171,6 +188,24 @@ ApplicationWindow {
                 }
 
                 PanelButton {
+                    id: usersRequestsBtn
+
+                    btnText: qsTr("My Requests")
+                    height: bottomPanel.btnHeight
+
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        top: parent.top
+                    }
+
+                    onClicked: {
+                        RequestManager.getUsersRequests()
+                        requestsListRect.open()
+                    }
+                }
+
+                PanelButton {
                     id: lastBtn
 
                     btnText: qsTr("Recently viewed")
@@ -179,7 +214,7 @@ ApplicationWindow {
                     anchors {
                         left: parent.left
                         right: parent.right
-                        top: parent.top
+                        top: usersRequestsBtn.bottom
                     }
 
                     onClicked: {
@@ -224,6 +259,7 @@ ApplicationWindow {
                     }
                 }
             }
+            }
 
             DelimiterLine {
                 id: menuVertDel
@@ -233,14 +269,13 @@ ApplicationWindow {
                     bottom: parent.bottom
                     left: menuRectangle.right
                 }
-                width: 2
-                visible: false
+                width: 0
             }
 
             Rectangle {
                 id: requestsListRect
-                visible: false
-                width: 640
+                property int openedWidth: 640
+                width: 0
                 anchors {
                     left: menuVertDel.right
                     top: parent.top
@@ -250,14 +285,81 @@ ApplicationWindow {
                 color: mainWindow.genIntColor
 
                 function open() {
-                    visible = true
-                    menuVertDel.visible = true
+                    width = requestsListRect.openedWidth
+                    menuVertDel.width = 2
                 }
 
                 function close() {
-                    visible = false
-                    menuVertDel.visible = false
+                    width = 0
+                    menuVertDel.width = 0
                 }
+
+                function opened() {
+                    return width == requestsListRect.openedWidth
+                }
+            }
+
+            ListView {
+                id: requestsView
+                property int textHeight: 20
+                anchors.fill: requestsListRect
+                visible: requestsListRect.opened()
+
+                model: reqModel
+//                spacing: 5
+//                clip: true
+//                headerPositioning: ListView.OverlayHeader
+                delegate: Rectangle {
+                    id: reqBackground
+
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+
+                    height: 100
+                    color: "pink"
+
+                    UserPhoto {
+                        id: reqPhoto
+                        size: parent.height - 10
+                        uri: model.photo
+                        anchors {
+                            left: parent.left
+                            verticalCenter: parent.verticalCenter
+                            leftMargin: 5
+                        }
+
+                    }
+
+                    Text {
+                        id: reqTitle
+
+                        text: model.title
+//                        height: requestsView.textHeight
+                        anchors {
+                            left: reqPhoto.right
+                            right: parent.right
+                            top: parent.top
+                        }
+                    }
+
+                    Text {
+                        id: reqDesc
+                        text: model.description
+//                        height: requestsView.textHeight
+                        anchors {
+                            left: reqPhoto.right
+                            right: parent.right
+                            top: reqTitle.bottom
+                            bottom: parent.bottom
+                        }
+                    }
+                }
+            }
+
+            RequestModel {
+                id: reqModel
             }
         }
 
@@ -265,7 +367,6 @@ ApplicationWindow {
             requestsListRect.close()
         }
     }
-
 
     Popup {
         id: settingsWindow
