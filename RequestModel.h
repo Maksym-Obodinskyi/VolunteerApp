@@ -34,6 +34,8 @@ public:
 
 public slots:
     void updateData(std::map<int, std::pair<Request, User>> data);
+    void cleanData();
+
 private:
     std::vector<std::tuple<int, Request, User>> _data;
 };

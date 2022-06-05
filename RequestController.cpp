@@ -4,6 +4,7 @@
 
 #include "RequestController.h"
 #include "SessionManager.h"
+#include "ConfigManager.h"
 
 RequestController::RequestController()
 {
@@ -38,15 +39,29 @@ void RequestController::getByFilter()
 void RequestController::getFavoritesList()
 {
     TRACE();
+    ConfigManager::instance().getFavorites();
 }
 
 void RequestController::getLastViewedList()
 {
     TRACE();
+    ConfigManager::instance().getLastViewed();
 }
 
 void RequestController::getUsersRequests()
 {
     TRACE();
-    SessionManager::instance().getUsersRequests();
+    ConfigManager::instance().getUsersRequests();
+}
+
+void RequestController::cleanData()
+{
+    TRACE();
+    emit cleanModel();
+}
+
+RequestController& RequestController::instance()
+{
+    static RequestController inst;
+    return inst;
 }

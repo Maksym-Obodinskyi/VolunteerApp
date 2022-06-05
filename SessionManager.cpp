@@ -6,27 +6,15 @@
 
 #include <map>
 
-std::pair<double, double> location;
-std::string description;
-std::string title;
-std::set<std::string> categories;
-int date;
-
-
-std::string name;
-std::string lastName;
-std::string number;
-std::string photo;
-double      rating;
-
-Request req {
+static Request req {
       {1.5, 54.2}
     , "Some short description"
     , "Very short title"
     , {"Category 1", "Category 2"}
     , 8
 };
-User user {
+
+static User user {
     "Maksym"
   , "Obodinskyi"
   , "+380930975704"
@@ -65,18 +53,6 @@ void SessionManager::addRequests()
 void SessionManager::getByFilter()
 {
     TRACE();
-    emit updateData(requests);
-}
-
-void SessionManager::getUsersRequests()
-{
-    TRACE();
-    INFO("requests size - {}", requests.size());
-
-//    for(const auto & [date, data] : requests) {
-//        INFO("key - %d, requestTitle - %s, userName - %s", date, data.first.title.c_str(), data.second._name.c_str());
-//    }
-
     emit updateData(requests);
 }
 

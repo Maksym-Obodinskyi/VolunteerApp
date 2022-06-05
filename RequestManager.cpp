@@ -7,7 +7,7 @@
 
 #include "RequestManager.h"
 
-RequestManager::RequestManager()
+RequestManager::RequestManager(RequestController & contr) : _contr(contr)
 {
     TRACE();
 }
@@ -15,53 +15,56 @@ RequestManager::RequestManager()
 void RequestManager::getRequests()
 {
     TRACE();
+    _contr.cleanData();
     _contr.getRequests();
 }
 
-void RequestManager::addToFavorites(const Request & request)
+void RequestManager::addToFavorites([[maybe_unused]]const Request & request)
 {
     TRACE();
+    _contr.cleanData();
     _contr.addToFavorites();
 }
 
 void RequestManager::editRequest()
 {
     TRACE();
+    _contr.cleanData();
     _contr.editRequest();
 }
 
-void RequestManager::addRequest(const Request & request)
+void RequestManager::addRequest([[maybe_unused]]const Request & request)
 {
     TRACE();
+    _contr.cleanData();
     _contr.addRequests();
 }
 
-void RequestManager::getByFilter(const std::set<const std::string &> & categories)
+void RequestManager::getByFilter([[maybe_unused]]const std::set<const std::string &> & categories)
 {
     TRACE();
+    _contr.cleanData();
     _contr.getByFilter();
 }
 
 void RequestManager::getFavoritesList()
 {
     TRACE();
+    _contr.cleanData();
     _contr.getFavoritesList();
 }
 void RequestManager::getLastViewedList()
 {
     TRACE();
+    _contr.cleanData();
     _contr.getLastViewedList();
 }
 
 void RequestManager::getUsersRequests()
 {
     TRACE();
+    _contr.cleanData();
     _contr.getUsersRequests();
-}
-
-RequestController & RequestManager::getContr()
-{
-    return _contr;
 }
 
 void RequestManager::declareInQML()

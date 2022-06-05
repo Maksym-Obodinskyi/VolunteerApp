@@ -7,40 +7,50 @@
 #include "RequestModel.h"
 #include "RequestManager.h"
 #include "SessionManager.h"
+#include "ConfigManager.h"
+#include "RequestController.h"
 
 RequestModel::RequestModel(QObject *parent) : QAbstractListModel(parent)
 {
     TRACE();
-    connect(&SessionManager::instance(), SIGNAL(updateData(std::map<int, std::pair<Request, User>>)),
-            this,                        SLOT(updateData(std::map<int, std::pair<Request, User>>)));
+    connect(&SessionManager::instance(),    SIGNAL(updateData(std::map<int, std::pair<Request, User>>)),
+            this,                           SLOT(updateData(std::map<int, std::pair<Request, User>>)));
+    connect(&ConfigManager::instance(),     SIGNAL(updateData(std::map<int, std::pair<Request, User>>)),
+            this,                           SLOT(updateData(std::map<int, std::pair<Request, User>>)));
+    connect(&RequestController::instance(), SIGNAL(cleanModel()),
+            this,                           SLOT(cleanData()));
 }
 
 void RequestModel::updateData(std::map<int, std::pair<Request, User>> data)
 {
     TRACE();
     INFO("size - {}", data.size());
-    beginRemoveRows(QModelIndex(), 0, _data.size() - 1);
-    _data.clear();
-    endRemoveRows();
+    if (!data.empty()) {
+        beginRemoveRows(QModelIndex(), 0, _data.size() - 1);
+        _data.clear();
+        endRemoveRows();
+    }
+
     _data.reserve(data.size());
     beginInsertRows(QModelIndex(), 0, data.size() - 1);
     for (const auto & [time, item]: data) {
         _data.push_back(std::make_tuple(time, item.first, item.second));
     }
     endInsertRows();
-//    emit dataChanged(startIndex, startIndex, QVector<int>() << Roles::Name
-//                                                            << Roles::lastName
-//                                                            << Roles::Number
-//                                                            << Roles::Photo
-//                                                            << Roles::Rating
-//                                                            << Roles::Location
-//                                                            << Roles::Description
-//                                                            << Roles::Title
-//                                                            << Roles::Categories
-//                                                            << Roles::Date);
 }
 
-int RequestModel::rowCount(const QModelIndex& parent) const
+void RequestModel::cleanData()
+{
+    if (_data.empty()) {
+        return;
+    }
+
+    beginRemoveRows(QModelIndex(), 0, _data.size() - 1);
+    _data.clear();
+    endRemoveRows();
+}
+
+int RequestModel::rowCount([[maybe_unused]]const QModelIndex& parent) const
 {
     TRACE();
     return _data.size();
@@ -57,11 +67,11 @@ QVariant RequestModel::data(const QModelIndex& index, int role) const
     const auto & [time, req, user] = _data[index.row()];
 
     switch (role) {
-        case Name:          return user._name.c_str();
-        case lastName:      return user._lastName.c_str();
-        case Number:        return user._number.c_str();
-        case Photo:         return user._photo.c_str();
-        case Rating:        return user._rating;
+        case Name:          return user.name.c_str();
+        case lastName:      return user.lastName.c_str();
+        case Number:        return user.number.c_str();
+        case Photo:         return user.photo.c_str();
+        case Rating:        return user.rating;
         case Description:   return req.description.c_str();
         case Title:         return req.title.c_str();
         case Date:          return req.date;

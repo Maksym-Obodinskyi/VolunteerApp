@@ -12,6 +12,7 @@ public:
           , std::set<std::string> _categories
           , int _date);
     Request() {}
+
     std::pair<double, double> location;
     std::string description;
     std::string title;

@@ -1,11 +1,12 @@
 #ifndef REQUESTCONTROLLER_H
 #define REQUESTCONTROLLER_H
 
+#include <QObject>
 
-class RequestController
+class RequestController : public QObject
 {
+    Q_OBJECT
 public:
-    RequestController();
     void getRequests();
     void addToFavorites();
     void editRequest();
@@ -14,5 +15,18 @@ public:
     void getFavoritesList();
     void getLastViewedList();
     void getUsersRequests();
+    void cleanData();
+
+    static RequestController& instance();
+
+signals:
+    void cleanModel();
+
+private:
+    RequestController();
+    RequestController(const RequestController &) = delete;
+    RequestController(const RequestController &&) = delete;
+    RequestController& operator=(const RequestController &) = delete;
+    RequestController& operator=(const RequestController &&) = delete;
 };
 #endif // REQUESTCONTROLLER_H

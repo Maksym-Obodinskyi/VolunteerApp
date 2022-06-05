@@ -1,15 +1,15 @@
 #include "User.h"
 
-User::User(std::string name
-         , std::string lastName
-         , std::string number
-         , std::string photo
-         , double      rating) :
-            _name(name)
-          , _lastName(lastName)
-          , _number(number)
-          , _photo(photo)
-          , _rating(rating)
+User::User(std::string _name
+         , std::string _lastName
+         , std::string _number
+         , std::string _photo
+         , double      _rating) :
+            name(_name)
+          , lastName(_lastName)
+          , number(_number)
+          , photo(_photo)
+          , rating(_rating)
 {
 
 }

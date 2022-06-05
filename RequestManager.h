@@ -11,7 +11,6 @@ class RequestManager : public QObject
 {
     Q_OBJECT
 public:
-
     static void declareInQML();
     static QObject* singletoneProvider(QQmlEngine * engine, QJSEngine * scriptEngine);
     static RequestManager& instance();
@@ -25,15 +24,14 @@ public:
     Q_INVOKABLE void getLastViewedList();
     Q_INVOKABLE void getUsersRequests();
 
-    RequestController & getContr();
 private:
-    RequestManager();
+    RequestManager(RequestController & contr = RequestController::instance());
     RequestManager(const RequestManager &) = delete;
     RequestManager(const RequestManager &&) = delete;
     RequestManager& operator=(const RequestManager &) = delete;
     RequestManager& operator=(const RequestManager &&) = delete;
 
-    RequestController   _contr;
+    RequestController & _contr;
 };
 
 #endif // REQUESTMANAGER_H
