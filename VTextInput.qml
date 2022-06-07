@@ -10,6 +10,6 @@ TextArea {
         id: root
 
         color: "white"
+        radius:5
     }
 }
-

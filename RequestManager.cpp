@@ -19,11 +19,15 @@ void RequestManager::getRequests()
     _contr.getRequests();
 }
 
-void RequestManager::addToFavorites([[maybe_unused]]const Request & request)
+void RequestManager::addToFavorites(double longtitude
+                                    , double latitude
+                                    , QString title
+                                    , QString description
+                                    , int date)
 {
     TRACE();
     _contr.cleanData();
-    _contr.addToFavorites();
+    _contr.addToFavorites(Request(std::make_pair(longtitude, latitude), title.toStdString(), description.toStdString(), {}, date));
 }
 
 void RequestManager::editRequest()

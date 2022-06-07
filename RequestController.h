@@ -3,12 +3,14 @@
 
 #include <QObject>
 
+#include "Request.h"
+
 class RequestController : public QObject
 {
     Q_OBJECT
 public:
     void getRequests();
-    void addToFavorites();
+    void addToFavorites(const Request & request);
     void editRequest();
     void addRequests();
     void getByFilter();

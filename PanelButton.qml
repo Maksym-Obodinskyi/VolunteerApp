@@ -12,6 +12,7 @@ Button {
     contentItem: Text {
         text: root.text
         font: root.font
+        color: "white"
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
     }

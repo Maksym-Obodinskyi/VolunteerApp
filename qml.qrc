@@ -13,5 +13,6 @@
         <file>SettingsPopup.qml</file>
         <file>AddRequestPopup.qml</file>
         <file>VTextInput.qml</file>
+        <file>VButton.qml</file>
     </qresource>
 </RCC>
