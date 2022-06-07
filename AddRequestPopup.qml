@@ -1,24 +1,30 @@
 import QtQuick 2.0
-import QtQuick.Controls 2.3
+import QtQuick.Controls 2.15
 import QtQuick.Controls 1.4
 
 import "resources/Constants"
+import request_manager 1.0
 
 Popup {
     id: root
 
-    property string genIntColor:    "#0047b3"
+    property string genIntColor:    "#4242aa"
+    property string fontColor:      "white"
 
     height: rect.height
     width: 600
     modal: true
     background: null
 
+    Overlay.modal: Rectangle {
+        color: "#bb101010"
+    }
+
     contentItem: Item {
         Rectangle {
             id: rect
             color: root.genIntColor
-            height: header.height + body.height + 20
+            height: header.height + body.height + 30
             radius: 10
             anchors {
                 left: parent.left
@@ -41,6 +47,7 @@ Popup {
                     height: 100
                     text: qsTr("Create your request")
                     font.pixelSize: 32
+                    color: root.fontColor
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                     anchors {
@@ -52,7 +59,6 @@ Popup {
 
                 DelimiterLine {
                     id: headerDelimiter
-
                     anchors {
                         top: headerText.bottom
                         left: parent.left
@@ -65,25 +71,26 @@ Popup {
                 id: body
 
                 property int horMargin: 30
-                property int verMargin: 10
+                property int controlVerMargin: 8
+                property int textVerMargin: 20
                 property int fontPixelSize: 17
                 height: titleItem.height
                       + descriptionItem.height
                       + categoriesItem.height
-                      + dateTimeItem.height
-                      + anchors.topMargin
+                      + controls.height
+                      + calendar.height + calendar.anchors.topMargin
 
                 anchors {
                     top: header.bottom
                     left: parent.left
                     right: parent.right
-                    topMargin: 30
                 }
 
                 Item {
                     id: titleItem
 
-                    height: titleText.height + textInput.height + anchors.topMargin
+                    height: titleText.height + titleTextInput.height
+                          + titleText.anchors.topMargin + titleTextInput.anchors.topMargin
 
                     anchors {
                         top: parent.top
@@ -98,6 +105,7 @@ Popup {
 
                         text: qsTr("Title:")
                         height: contentHeight
+                        color: root.fontColor
                         font.pixelSize: body.fontPixelSize
 
                         horizontalAlignment: Text.AlignLeft
@@ -107,11 +115,12 @@ Popup {
                             top: parent.top
                             left: parent.left
                             right: parent.right
+                            topMargin: body.textVerMargin
                         }
                     }
 
                     VTextInput {
-                        id: textInput
+                        id: titleTextInput
 
                         placeholderText: qsTr("Walk animals")
                         font.pixelSize: body.fontPixelSize
@@ -120,7 +129,7 @@ Popup {
                             top: titleText.bottom
                             left: parent.left
                             right: parent.right
-                            topMargin: body.verMargin
+                            topMargin: body.controlVerMargin
                         }
                     }
                 }
@@ -128,13 +137,13 @@ Popup {
                 Item {
                     id: descriptionItem
 
-                    height: descText.height + descInput.height + anchors.topMargin
+                    height: descText.height + descInput.height
+                          + descText.anchors.topMargin + descInput.anchors.topMargin
 
                     anchors {
                         top: titleItem.bottom
                         left: parent.left
                         right: parent.right
-                        topMargin: body.verMargin
                         leftMargin: body.horMargin
                         rightMargin: body.horMargin
                     }
@@ -144,6 +153,7 @@ Popup {
 
                         text: qsTr("Detailed description:")
                         height: contentHeight
+                        color: root.fontColor
                         font.pixelSize: body.fontPixelSize
 
                         horizontalAlignment: Text.AlignLeft
@@ -153,6 +163,7 @@ Popup {
                             top: parent.top
                             left: parent.left
                             right: parent.right
+                            topMargin: body.textVerMargin
                         }
                     }
 
@@ -166,7 +177,7 @@ Popup {
                             top: descText.bottom
                             left: parent.left
                             right: parent.right
-                            topMargin: body.verMargin
+                            topMargin: body.controlVerMargin
                         }
                     }
                 }
@@ -174,13 +185,13 @@ Popup {
                 Item {
                     id: categoriesItem
 
-                    height: categoriesText.height + categoriesComboBox.height + anchors.topMargin
+                    height: categoriesText.height + categoriesComboBox.height
+                          + categoriesText.anchors.topMargin + categoriesComboBox.anchors.topMargin
 
                     anchors {
                         top: descriptionItem.bottom
                         left: parent.left
                         right: parent.right
-                        topMargin: body.verMargin
                         leftMargin: body.horMargin
                         rightMargin: body.horMargin
                     }
@@ -190,6 +201,7 @@ Popup {
 
                         text: qsTr("Categories:")
                         height: contentHeight
+                        color: root.fontColor
                         font.pixelSize: body.fontPixelSize
 
                         horizontalAlignment: Text.AlignLeft
@@ -199,6 +211,7 @@ Popup {
                             top: parent.top
                             left: parent.left
                             right: parent.right
+                            topMargin: body.textVerMargin
                         }
                     }
 
@@ -210,30 +223,74 @@ Popup {
                             top: categoriesText.bottom
                             left: parent.left
                             right: parent.right
-                            topMargin: body.verMargin
+                            topMargin: body.controlVerMargin
                         }
                     }
                 }
 
-                Item {
-                    id: dateTimeItem
+                Calendar {
+                    id: calendar
 
-                    height: calendar.height + anchors.topMargin
-
+                    width: 350
                     anchors {
                         top: categoriesItem.bottom
-                        left: parent.left
-                        right: parent.right
-                        topMargin: body.verMargin
-                        leftMargin: body.horMargin
-                        rightMargin: body.horMargin
+                        horizontalCenter: parent.horizontalCenter
+                        topMargin: 30
+                    }
+                }
+
+                Item {
+                    id: controls
+
+                    property int horMargin: 30
+                    property int buttonsTopMargin: 40
+                    property int buttonsHeight: 30
+                    property int buttonsWidth: 140
+
+                    height: Math.max(addRequest.height, cancelRequest.height)
+                          + Math.max(addRequest.anchors.topMargin, cancelRequest.anchors.topMargin)
+                    width: calendar.width
+
+                    anchors {
+                        top: calendar.bottom
+                        horizontalCenter: calendar.horizontalCenter
                     }
 
-                    Calendar {
-                        id: calendar
+                    VButton {
+                        id: addRequest
+
+                        text: "Post"
+                        height: controls.buttonsHeight
+                        width: controls.buttonsWidth
+
                         anchors {
                             top: parent.top
                             left: parent.left
+                            topMargin: controls.buttonsTopMargin
+                        }
+                        onClicked: {
+                            RequestManager.addToFavorites(49.841598, 24.028394
+                                                          , titleTextInput.text
+                                                          , descInput.text
+                                                          , calendar.data);
+                        }
+                    }
+
+                    VButton {
+                        id: cancelRequest
+
+                        text: "Cancel"
+                        height: controls.buttonsHeight
+                        width: controls.buttonsWidth
+
+                        anchors {
+                            top: parent.top
+                            right: parent.right
+                            topMargin: controls.buttonsTopMargin
+                        }
+
+                        onClicked: {
+                            console.log("Cancel - I am pressed, please add me functionality")
                         }
                     }
                 }

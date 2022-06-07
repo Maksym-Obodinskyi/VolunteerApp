@@ -15,9 +15,10 @@ ApplicationWindow {
     visibility: "FullScreen"
     visible: true
 
-    readonly property string genIntColor:   "#0047b3"
+    readonly property string genIntColor:   "#4242aa"
     readonly property string userName:      "Maksym"
     readonly property string userNumber:    "+380930975704"
+    readonly property string fontColor:     "white"
 
     Map {
         id: map
@@ -31,9 +32,7 @@ ApplicationWindow {
     Plugin {
         id: googleMaps
 //        required: Plugin.AnyPlacesFeature
-        name: "googlemaps" // "mapboxgl", "esri", ...
-//        PluginParameter {name: "osm.MapType"; value: "Transit Map"}
-        // specify plugin parameters if necessary
+        name: "mapboxgl" // "mapboxgl", "esri", ...
     }
 
     IconButton {
@@ -94,6 +93,10 @@ ApplicationWindow {
         width: requestsListRect.width + menuVertDel.width + menuRectangle.width
         height: mainWindow.height
 
+        Overlay.modal: Rectangle {
+            color: "#bb101010"
+        }
+
         contentItem: Item {
             id: menuItem
 
@@ -144,6 +147,7 @@ ApplicationWindow {
                         id: menuUserName
 
                         text: mainWindow.userName
+                        color: mainWindow.fontColor
 
                         anchors {
                             top: userMenuPhoto.bottom
@@ -157,6 +161,7 @@ ApplicationWindow {
                         id: menuUserNumber
 
                         text: mainWindow.userNumber
+                        color: mainWindow.fontColor
 
                         anchors {
                             top: menuUserName.bottom

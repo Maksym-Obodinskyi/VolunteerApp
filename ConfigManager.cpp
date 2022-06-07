@@ -4,12 +4,17 @@
 
 #include "ConfigManager.h"
 
+#include <unistd.h>
+#include <sys/types.h>
 #include <map>
 #include <fstream>
 #include <filesystem>
 #include <pwd.h>
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
+#include "rapidjson/filewritestream.h"
+#include <rapidjson/writer.h>
+#include <chrono>
 
 static Request lastViewedReq {
       {1.9, 4.2}
@@ -56,6 +61,7 @@ static const std::map<int, std::pair<Request, User>> lastViewed
 
 std::string ConfigManager::FAVORITES_FILE;
 std::string ConfigManager::CONFIG_DIR;
+std::string ConfigManager::USER_CONFIG_FILE;
 
 ConfigManager::ConfigManager()
 {
@@ -83,6 +89,51 @@ ConfigManager::ConfigManager()
         }
         file.close();
     }
+
+    USER_CONFIG_FILE = CONFIG_DIR + "/user.json";
+
+    readUserConfig();
+}
+
+void ConfigManager::readUserConfig()
+{
+    TRACE();
+
+    std::ifstream ifs(USER_CONFIG_FILE);
+    if (!ifs) {
+        ERROR("User config not found");
+        return;
+    }
+
+    rapidjson::IStreamWrapper   isw(ifs);
+    rapidjson::Document         json;
+    json.ParseStream(isw);
+    if (json.HasParseError()) {
+        ERROR("Failed to parse user config");
+        return;
+    }
+    if (!json.IsObject()) {
+        ERROR("User is not object");
+        return;
+    }
+
+    if (!json.HasMember("name")
+     || !json.HasMember("lastname")
+     || !json.HasMember("number")
+     || !json.HasMember("photo")
+     || !json.HasMember("rating")
+     || !json.HasMember("password"))
+    {
+        WARNING("User config is not full");
+        return;
+    }
+
+    _user.name      = json["name"].GetString();
+    _user.lastName  = json["lastname"].GetString();
+    _user.number    = json["number"].GetString();
+    _user.photo     = json["photo"].GetString();
+    _user.rating    = json["rating"].GetDouble();
+    _userPswd       = json["password"].GetString();
 }
 
 ConfigManager & ConfigManager::instance()
@@ -103,6 +154,85 @@ void ConfigManager::getLastViewed()
     TRACE();
 
     emit updateData(lastViewed);
+}
+
+void ConfigManager::addToFavorites(const Request & request)
+{
+    std::fstream fs;
+    if (!std::filesystem::exists(FAVORITES_FILE)) {
+        fs.open(FAVORITES_FILE, std::ios_base::in | std::ios_base::out);
+        if (!fs) {
+            ERROR("Favorites config not found");
+            return;
+        }
+        fs << "[]";
+        fs.close();
+    }
+
+    fs.open(FAVORITES_FILE, std::ios_base::in | std::ios_base::out);
+    if (!fs) {
+        ERROR("Favorites config not found");
+        return;
+    }
+
+    rapidjson::Document json;
+    rapidjson::IStreamWrapper isw(fs);
+    json.ParseStream(isw);
+    if (json.HasParseError()) {
+        ERROR("Failed to parse favorites config");
+        return;
+    }
+    if (!json.IsArray()) {
+        ERROR("Favorites are not array json");
+        return;
+    }
+
+    rapidjson::Value v;
+    v.SetObject();
+
+    auto & allocator = json.GetAllocator();
+
+    TRACE();
+
+    rapidjson::Value requestV;
+    requestV.SetObject();
+
+    rapidjson::Value catArr(rapidjson::kArrayType);
+    for (const auto & item : request.categories) {
+        catArr.PushBack(rapidjson::StringRef(item.c_str()), allocator);
+    }
+    requestV.AddMember("longitude",     request.location.first,      allocator);
+    requestV.AddMember("latitude",      request.location.second,       allocator);
+    requestV.AddMember("title",         rapidjson::StringRef(request.title.c_str()),          allocator);
+    requestV.AddMember("description",   rapidjson::StringRef(request.description.c_str()),    allocator);
+    requestV.AddMember("categories",    catArr, allocator);
+    requestV.AddMember("date",          request.date,           allocator);
+
+    v.AddMember("Request", requestV, allocator);
+
+    rapidjson::Value userV;
+    userV.SetObject();
+
+    userV.AddMember("name",         rapidjson::StringRef(_user.name.c_str()),     allocator);
+    userV.AddMember("lastname",     rapidjson::StringRef(_user.lastName.c_str()),     allocator);
+    userV.AddMember("number",       rapidjson::StringRef(_user.number.c_str()), allocator);
+    userV.AddMember("photo",        rapidjson::StringRef(_user.photo.c_str()),    allocator);
+    userV.AddMember("rating",       _user.rating,   allocator);
+
+    v.AddMember("User", userV, allocator);
+    v.AddMember("datetime", std::chrono::duration_cast<std::chrono::seconds>
+                (std::chrono::system_clock::now().time_since_epoch()).count(), allocator);
+
+    json.PushBack(v, allocator);
+
+    FILE* fp = fopen(FAVORITES_FILE.c_str(), "w");
+
+    char writeBuffer[65536];
+    rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+
+    rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+    json.Accept(writer);
+    fclose(fp);
 }
 
 void ConfigManager::getFavorites()

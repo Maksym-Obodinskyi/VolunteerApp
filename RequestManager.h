@@ -16,7 +16,11 @@ public:
     static RequestManager& instance();
 
     Q_INVOKABLE void getRequests();
-    Q_INVOKABLE void addToFavorites(const Request & request);
+    Q_INVOKABLE void addToFavorites(double longtitude
+                                    , double latitude
+                                    , QString title
+                                    , QString description
+                                    , int date);
     Q_INVOKABLE void editRequest();
     Q_INVOKABLE void addRequest(const Request & request);
     Q_INVOKABLE void getByFilter(const std::set<const std::string &> & categories);

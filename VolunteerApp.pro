@@ -18,7 +18,7 @@ TRANSLATIONS += \
 CONFIG +=   lrelease \
             embed_translations
 
-QMAKE_CXXFLAGS += -std=c++20
+QMAKE_CXXFLAGS += -std=c++2a
 
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

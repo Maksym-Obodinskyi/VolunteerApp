@@ -5,12 +5,17 @@ Popup {
     id: root
 
     property int genLeftMargin: 20
+    property string fontColor:  "white"
 
     visible: false
     modal: true
 
     function open() {
         visible = true
+    }
+
+    Overlay.modal: Rectangle {
+        color: "#bb101010"
     }
 
     contentItem: Rectangle {
@@ -36,6 +41,7 @@ Popup {
                 text: qsTr("Settings")
                 height: 40
                 font.pixelSize: 20
+                color: root.fontColor
                 anchors {
                     left: parent.left
                     right: parent.right
@@ -57,6 +63,7 @@ Popup {
             Text {
                 id: settingsUserName
                 text: mainWindow.userName
+                color: root.fontColor
                 anchors {
                     top: settingsTextHeader.bottom
                     left: settingsUserPhoto.right
@@ -69,6 +76,7 @@ Popup {
             Text {
                 id: settingsUserNumber
                 text: mainWindow.userNumber
+                color: root.fontColor
                 anchors {
                     left: settingsUserPhoto.right
                     top: settingsUserName.bottom
