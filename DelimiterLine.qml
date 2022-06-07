@@ -4,4 +4,5 @@ Rectangle {
     id: root
     color: "black"
     height: 2
+    width: 2
 }

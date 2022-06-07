@@ -10,5 +10,8 @@
         <file>resources/Constants/Style.qml</file>
         <file>resources/icons/showMore.png</file>
         <file>DelimiterLine.qml</file>
+        <file>SettingsPopup.qml</file>
+        <file>AddRequestPopup.qml</file>
+        <file>VTextInput.qml</file>
     </qresource>
 </RCC>
