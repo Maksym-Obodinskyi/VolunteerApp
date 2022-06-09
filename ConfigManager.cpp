@@ -3,6 +3,7 @@
 #include "Logger.h"
 
 #include "ConfigManager.h"
+#include "SessionManager.h"
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -16,48 +17,48 @@
 #include <rapidjson/writer.h>
 #include <chrono>
 
-static Request lastViewedReq {
-      {1.9, 4.2}
-    , "Some short description-LAST"
-    , "Very short title-LAST"
-    , {"Category 1-LAST", "Category 2-LAST"}
-    , 22
-};
+//static Request lastViewedReq {
+//      {1.9, 4.2}
+//    , "Some short description-LAST"
+//    , "Very short title-LAST"
+//    , {"Category 1-LAST", "Category 2-LAST"}
+//    , 22
+//};
 
-static User lastViewedUser {
-    "Maksym-LAST"
-  , "Obodinskyi-LAST"
-  , "+380930975704-LAST"
-  , "OMG-LAST"
-  , 45435.454543
-};
+//static User lastViewedUser {
+//    "Maksym-LAST"
+//  , "Obodinskyi-LAST"
+//  , "+380930975704-LAST"
+//  , "OMG-LAST"
+//  , 45435.454543
+//};
 
-static Request req {
-      {1.5, 54.2}
-    , "Some short description"
-    , "Very short title"
-    , {"Category 1", "Category 2"}
-    , 8
-};
+//static Request req {
+//      {1.5, 54.2}
+//    , "Some short description"
+//    , "Very short title"
+//    , {"Category 1", "Category 2"}
+//    , 8
+//};
 
-static User user {
-    "Maksym"
-  , "Obodinskyi"
-  , "+380930975704"
-  , "OMG"
-  , 999.999
-};
+//static User user {
+//    "Maksym"
+//  , "Obodinskyi"
+//  , "+380930975704"
+//  , "OMG"
+//  , 999.999
+//};
 
-static const std::map<int, std::pair<Request, User>> requests
-{
-    {1, {req, user}}
-};
+//static const std::map<int, std::pair<Request, User>> requests
+//{
+//    {1, {req, user}}
+//};
 
 
-static const std::map<int, std::pair<Request, User>> lastViewed
-{
-    {1, {lastViewedReq, lastViewedUser}}
-};
+//static const std::map<int, std::pair<Request, User>> lastViewed
+//{
+//    {1, {lastViewedReq, lastViewedUser}}
+//};
 
 std::string ConfigManager::FAVORITES_FILE;
 std::string ConfigManager::CONFIG_DIR;
@@ -98,6 +99,7 @@ ConfigManager::ConfigManager()
 void ConfigManager::readUserConfig()
 {
     TRACE();
+    User _user;
 
     std::ifstream ifs(USER_CONFIG_FILE);
     if (!ifs) {
@@ -122,7 +124,8 @@ void ConfigManager::readUserConfig()
      || !json.HasMember("number")
      || !json.HasMember("photo")
      || !json.HasMember("rating")
-     || !json.HasMember("password"))
+     || !json.HasMember("password")
+     || !json.HasMember("email"))
     {
         WARNING("User config is not full");
         return;
@@ -133,7 +136,10 @@ void ConfigManager::readUserConfig()
     _user.number    = json["number"].GetString();
     _user.photo     = json["photo"].GetString();
     _user.rating    = json["rating"].GetDouble();
-    _userPswd       = json["password"].GetString();
+    _user.password  = json["password"].GetString();
+    _user.email     = json["email"].GetString();
+
+    SessionManager::instance().setUser(_user);
 }
 
 ConfigManager & ConfigManager::instance()
@@ -146,17 +152,17 @@ void ConfigManager::getUsersRequests()
 {
     TRACE();
 
-    emit updateData(requests);
+//    emit updateData(requests);
 }
 
 void ConfigManager::getLastViewed()
 {
     TRACE();
 
-    emit updateData(lastViewed);
+//    emit updateData(lastViewed);
 }
 
-void ConfigManager::addToFavorites(const Request & request)
+void ConfigManager::addToFavorites(const Request & request, const User & user)
 {
     std::fstream fs;
     if (!std::filesystem::exists(FAVORITES_FILE)) {
@@ -213,11 +219,13 @@ void ConfigManager::addToFavorites(const Request & request)
     rapidjson::Value userV;
     userV.SetObject();
 
-    userV.AddMember("name",         rapidjson::StringRef(_user.name.c_str()),     allocator);
-    userV.AddMember("lastname",     rapidjson::StringRef(_user.lastName.c_str()),     allocator);
-    userV.AddMember("number",       rapidjson::StringRef(_user.number.c_str()), allocator);
-    userV.AddMember("photo",        rapidjson::StringRef(_user.photo.c_str()),    allocator);
-    userV.AddMember("rating",       _user.rating,   allocator);
+    userV.AddMember("name",         rapidjson::StringRef(user.name.c_str()),     allocator);
+    userV.AddMember("lastname",     rapidjson::StringRef(user.lastName.c_str()),     allocator);
+    userV.AddMember("number",       rapidjson::StringRef(user.number.c_str()), allocator);
+    userV.AddMember("photo",        rapidjson::StringRef(user.photo.c_str()),    allocator);
+    userV.AddMember("rating",       user.rating,   allocator);
+    userV.AddMember("password",     rapidjson::StringRef(user.photo.c_str()),    allocator);
+    userV.AddMember("email",        rapidjson::StringRef(user.email.c_str()),    allocator);
 
     v.AddMember("User", userV, allocator);
     v.AddMember("datetime", std::chrono::duration_cast<std::chrono::seconds>
@@ -287,7 +295,9 @@ void ConfigManager::getFavorites()
          || !userField.HasMember("lastname")
          || !userField.HasMember("number")
          || !userField.HasMember("photo")
-         || !userField.HasMember("rating"))
+         || !userField.HasMember("rating")
+                || !userField.HasMember("email")
+                || !userField.HasMember("password"))
         {
             WARNING("Request or User field is not full");
             continue;
@@ -306,7 +316,8 @@ void ConfigManager::getFavorites()
         }
 
         int dateTime        = req["datetime"].GetInt();
-        _requests[dateTime] = std::make_pair<Request, User>({{reqField["longitude"].GetDouble(),reqField["latitude"].GetDouble()}
+        _requests[dateTime] = std::make_pair<Request
+                , User>({{reqField["longitude"].GetDouble(),reqField["latitude"].GetDouble()}
                                                             , reqField["description"].GetString()
                                                             , reqField["title"].GetString()
                                                             , categories
@@ -315,8 +326,48 @@ void ConfigManager::getFavorites()
                                                             , userField["lastname"].GetString()
                                                             , userField["number"].GetString()
                                                             , userField["photo"].GetString()
-                                                            , userField["rating"].GetDouble()});
+                                                            , userField["rating"].GetDouble()
+                                                            , userField["email"].GetString()
+                                                            , userField["password"].GetString()});
     }
 
     emit updateData(_requests);
+}
+
+void ConfigManager::saveUser(const User & user)
+{
+    TRACE();
+    rapidjson::Document json;
+    auto & allocator = json.GetAllocator();
+    rapidjson::Value userV;
+    json.SetObject();
+
+    json.AddMember("name",         rapidjson::StringRef(user.name.c_str()),     allocator);
+    TRACE();
+    json.AddMember("lastname",     rapidjson::StringRef(user.lastName.c_str()),     allocator);
+    TRACE();
+    json.AddMember("number",       rapidjson::StringRef(user.number.c_str()), allocator);
+    TRACE();
+    json.AddMember("photo",        rapidjson::StringRef(user.photo.c_str()),    allocator);
+    TRACE();
+    json.AddMember("rating",       user.rating,   allocator);
+    TRACE();
+    json.AddMember("password",     rapidjson::StringRef(user.password.c_str()),    allocator);
+    TRACE();
+    json.AddMember("email",        rapidjson::StringRef(user.email.c_str()),    allocator);
+    TRACE();
+
+    FILE* fp = fopen(USER_CONFIG_FILE.c_str(), "w");
+    TRACE();
+
+    char writeBuffer[65536];
+    TRACE();
+    rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+    TRACE();
+
+    rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+    TRACE();
+    json.Accept(writer);
+    TRACE();
+    fclose(fp);
 }

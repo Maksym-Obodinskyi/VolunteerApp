@@ -8,6 +8,8 @@
 
 #include "RequestManager.h"
 #include "RequestModel.h"
+#include "SessionManager.h"
+#include "Request.h"
 
 namespace fs = std::filesystem;
 
@@ -15,6 +17,8 @@ int main(int argc, char *argv[])
 {
     RequestManager::declareInQML();
     RequestModel::declareInQML();
+    SessionManager::declareInQML();
+    Request::declareInQML();
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);

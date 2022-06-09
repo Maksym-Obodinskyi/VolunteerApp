@@ -16,11 +16,11 @@ void RequestController::getRequests()
     TRACE();
 }
 
-void RequestController::addToFavorites(const Request & request)
+void RequestController::addToFavorites(const Request & request, const User & user)
 {
     TRACE();
 
-    ConfigManager::instance().addToFavorites(request);
+    ConfigManager::instance().addToFavorites(request, user);
 }
 
 void RequestController::editRequest()

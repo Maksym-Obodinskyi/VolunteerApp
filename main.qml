@@ -7,7 +7,9 @@ import QtPositioning 5.15
 
 import "resources/Constants"
 import request_manager 1.0
+import session_manager 1.0
 import request_model 1.0
+import request 1.0
 
 ApplicationWindow {
     id: mainWindow
@@ -15,23 +17,91 @@ ApplicationWindow {
     visibility: "FullScreen"
     visible: true
 
+    function printFoo() {
+        console.log("Woooow")
+    }
+
     readonly property string genIntColor:   "#4242aa"
-    readonly property string userName:      "Maksym"
-    readonly property string userNumber:    "+380930975704"
+    readonly property string userName:      SessionManager.name
+    readonly property string userNumber:    SessionManager.phone
     readonly property string fontColor:     "white"
 
     Map {
         id: map
+        property bool isGetLocation: false
         visible: true
         anchors.fill: parent
         plugin: googleMaps
         center: QtPositioning.coordinate(49.841598, 24.028394)
         zoomLevel: 13
+
+        property var marker: null
+        property var coor: null
+
+        function createMarker(coordinate) {
+            var circle = Qt.createQmlObject('import QtQuick 2.0
+                import QtLocation 5.15
+
+                MapQuickItem {
+                    id: marker
+                    anchorPoint.x: image.width / 2
+                    anchorPoint.y: image.height
+                    width: image.width
+                    height: image.height
+                    sourceItem: Image {
+                        id: image
+                        source: "qrc:/resources/icons/marker.png"
+                        MouseArea {
+                            id:mouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onEntered: {mainWindow.printFoo()}
+                        }
+                    }
+                }', map)
+            circle.coordinate = coordinate
+            map.marker = circle
+            map.addMapItem(circle)
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onDoubleClicked: {
+                if (map.isGetLocation) {
+                    map.removeMapItem(map.marker)
+                    map.createMarker(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
+                    map.coor = map.toCoordinate(Qt.point(mouse.x,mouse.y))
+                }
+            }
+
+            VButton {
+                id: sendLocationBtn
+
+                visible: map.isGetLocation
+
+                width: 300
+                height: 50
+
+                text: map.marker === null ? qsTr("Double click to choose location") : qsTr("Choose this location")
+
+                anchors.bottomMargin: 20
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                onClicked: {
+                    if (map.marker !== null) {
+                        addRequestPopup.addRequest(map.coor.latitude, map.coor.longitude)
+                        addRequestPopup.clear()
+                        map.isGetLocation = false;
+                        map.removeMapItem(map.marker)
+                    }
+                }
+            }
+        }
     }
 
     Plugin {
         id: googleMaps
-//        required: Plugin.AnyPlacesFeature
         name: "mapboxgl" // "mapboxgl", "esri", ...
     }
 
@@ -388,9 +458,64 @@ ApplicationWindow {
     AddRequestPopup {
         id: addRequestPopup
         anchors.centerIn: parent
+        onGetLocation: {
+            map.isGetLocation = true
+        }
+    }
+
+    Popup {
+        id: signInPopup
+        anchors.centerIn: parent
+        modal: true
+        closePolicy: Popup.NoAutoClose
+        background: null
+        width: 500
+        height: 400
+        Overlay.modal: Rectangle {
+            color: "#bb101010"
+        }
+        contentItem: SignInWindow {
+            onSignedIn: {
+                signInPopup.close()
+            }
+            onClose: {
+                signInPopup.close()
+                createAccPopup.open()
+            }
+        }
+    }
+
+    Popup {
+        id: createAccPopup
+        anchors.centerIn: parent
+        modal: true
+        closePolicy: Popup.CloseOnPressOutside
+        background: null
+        width: 600
+        height: 500
+        Overlay.modal: Rectangle {
+            color: "#bb101010"
+        }
+        contentItem: CreateAccWin {
+            onCreated: {
+                createAccPopup.close()
+            }
+            onBack: {
+                createAccPopup.close()
+                signInPopup.open()
+            }
+        }
     }
 
     Component.onCompleted: {
-        RequestManager.getRequests()
+        signInPopup.open()
+
+        map.clearMapItems()
+        var list = RequestManager.getRequests();
+        for(var it = 0; it < list.length; it++)
+        {
+            map.createMarker(QtPositioning.coordinate(list[it].latitude, list[it].longitude))
+        }
+
     }
 }

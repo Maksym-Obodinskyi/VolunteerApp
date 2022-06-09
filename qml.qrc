@@ -14,7 +14,10 @@
         <file>AddRequestPopup.qml</file>
         <file>VTextInput.qml</file>
         <file>VButton.qml</file>
-        <file>SingInWindow.qml</file>
+        <file>SignInWindow.qml</file>
         <file>CreateAccWin.qml</file>
+        <file>resources/icons/marker.png</file>
+        <file>MapMarker.qml</file>
+        <file>ShortRequest.qml</file>
     </qresource>
 </RCC>

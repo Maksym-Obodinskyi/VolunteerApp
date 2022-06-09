@@ -4,6 +4,7 @@ Rectangle {
     id: root
     property alias  text: text.text
     property string activeColor: "grey"
+    radius: 5
 
     signal clicked
 

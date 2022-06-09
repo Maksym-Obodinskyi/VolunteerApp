@@ -3,11 +3,16 @@ import QtQuick.Window 2.14
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 
+import session_manager 1.0
+
 Rectangle {
     id: root
-    width: 500
-    height: 400
+
     visible: true
+    color: "#4242aa"
+
+    signal signedIn;
+    signal close;
 
     Text {
         id: title
@@ -18,38 +23,55 @@ Rectangle {
         anchors.topMargin: 20
         horizontalAlignment: Text.AlignHCenter
         font.pointSize: 20
+        color: "white"
     }
+
     Item {
         id: writePhone
         width: parent.width -40
         anchors.top: title.bottom
         anchors.topMargin: 50
-        TextField {
+
+        VTextInput {
             id: phoneField
             width:  parent.width
             height: 50
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.leftMargin: 20
+            maximumLength: 13
             placeholderText: qsTr("Enter phone")
         }
 
-        Label {
-            id: forgetPhone
+        VTextInput {
+            id: pswdField
+
+            width:  parent.width
+            height: 50
             anchors.top: phoneField.bottom
             anchors.left: parent.left
-            anchors.leftMargin: 20
             anchors.topMargin: 20
-            text: "Forgot your phone?"
-            MouseArea{
-                anchors.fill: parent
-                onClicked: forgetPhone.text = "Yes i forget"
+            anchors.leftMargin: 20
+            maximumLength: 35
+            echoMode: TextInput.Password
+            placeholderText: qsTr("Enter password")
+        }
+
+        Text {
+            id: isPwsdOk
+            text: qsTr("Please try again")
+            visible: false
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: pswdField.bottom
+                topMargin: 20
+                leftMargin: 20
             }
         }
     }
 
     Item {
-
         width: parent.width
         height: 50
         anchors.bottom: parent.bottom
@@ -60,16 +82,17 @@ Rectangle {
             height: parent.height
             anchors.leftMargin: 20
             anchors.bottom: parent.bottom
-            text: "Create new account"
+            text: qsTr("Create account")
+            color: "white"
             MouseArea{
                 anchors.fill: parent
-                onClicked: ill.text = "Go create account"
+                onClicked: close()
             }
         }
 
         Button {
             id: nextButton
-            text: "Next"
+            text: qsTr("Sign in")
             height: 50
             width: 100
             anchors.right: parent.right
@@ -77,7 +100,19 @@ Rectangle {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 20
 
-            onClicked: phoneField.text += "Read"
+            onClicked: {
+                if (SessionManager.signIn(phoneField.text, pswdField.text)) {
+                    signedIn();
+                    isPwsdOk.visible = false
+                } else {
+                    isPwsdOk.visible = true
+                }
+            }
         }
+    }
+
+    Component.onCompleted: {
+        pswdField.text = SessionManager.password
+        phoneField.text = SessionManager.phone
     }
 }

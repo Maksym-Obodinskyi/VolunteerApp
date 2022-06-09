@@ -36,3 +36,5 @@ HEADERS += \
 
 PKGCONFIG +=    fmt \
                 rapidjson
+
+DISTFILES +=
