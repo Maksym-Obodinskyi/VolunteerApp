@@ -15,8 +15,8 @@ public:
     void getLastViewed();
     void getFavorites();
 
-    void addToFavorites(const Request & request);
-
+    void addToFavorites(const Request & request, const User & user);
+    void saveUser(const User & user);
 
     static ConfigManager & instance();
 
@@ -37,7 +37,6 @@ private:
     static std::string USER_CONFIG_FILE;
     std::string                             _userPswd;
     std::map<int, std::pair<Request, User>> _requests;
-    User                                    _user;
 };
 
 #endif // CONFIGMANAGER_H

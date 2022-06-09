@@ -15,7 +15,7 @@ public:
     static QObject* singletoneProvider(QQmlEngine * engine, QJSEngine * scriptEngine);
     static RequestManager& instance();
 
-    Q_INVOKABLE void getRequests();
+    Q_INVOKABLE QVariantList getRequests();
     Q_INVOKABLE void addToFavorites(double longtitude
                                     , double latitude
                                     , QString title

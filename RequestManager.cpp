@@ -12,11 +12,21 @@ RequestManager::RequestManager(RequestController & contr) : _contr(contr)
     TRACE();
 }
 
-void RequestManager::getRequests()
+QVariantList RequestManager::getRequests()
 {
     TRACE();
+    QVariantList list;
+    Request req {
+          {49.84004810606953, 24.02204252906137}
+        , "Some short description"
+        , "Very short title"
+        , {"Category 1", "Category 2"}
+        , 8
+    };
     _contr.cleanData();
     _contr.getRequests();
+    list << QVariant::fromValue(req);
+    return list;
 }
 
 void RequestManager::addToFavorites(double longtitude
@@ -27,7 +37,8 @@ void RequestManager::addToFavorites(double longtitude
 {
     TRACE();
     _contr.cleanData();
-    _contr.addToFavorites(Request(std::make_pair(longtitude, latitude), title.toStdString(), description.toStdString(), {}, date));
+    _contr.addToFavorites(Request(std::make_pair(longtitude, latitude), title.toStdString(), description.toStdString(), {}, date)
+                          , User());
 }
 
 void RequestManager::editRequest()

@@ -1,6 +1,6 @@
 import QtQuick 2.0
-import QtQuick.Controls 2.15
 import QtQuick.Controls 1.4
+import QtQuick.Controls 2.15
 
 import "resources/Constants"
 import request_manager 1.0
@@ -15,6 +15,20 @@ Popup {
     width: 600
     modal: true
     background: null
+
+    signal getLocation;
+
+    function addRequest(latitude, longitude) {
+        RequestManager.addToFavorites(latitude, longitude
+                                      , titleTextInput.text
+                                      , descInput.text
+                                      , calendar.data);
+    }
+
+    function clear() {
+        titleTextInput.text = ""
+        descInput.text = ""
+    }
 
     Overlay.modal: Rectangle {
         color: "#bb101010"
@@ -167,10 +181,10 @@ Popup {
                         }
                     }
 
-                    VTextInput {
+                    TextArea {
                         id: descInput
 
-                        placeholderText: qsTr("Walk animals")
+                        placeholderText: qsTr("Description...")
                         font.pixelSize: body.fontPixelSize
                         height: 100
                         anchors {
@@ -178,6 +192,11 @@ Popup {
                             left: parent.left
                             right: parent.right
                             topMargin: body.controlVerMargin
+                        }
+
+                        background: Rectangle {
+                            color: "white"
+                            radius:5
                         }
                     }
                 }
@@ -269,10 +288,8 @@ Popup {
                             topMargin: controls.buttonsTopMargin
                         }
                         onClicked: {
-                            RequestManager.addToFavorites(49.841598, 24.028394
-                                                          , titleTextInput.text
-                                                          , descInput.text
-                                                          , calendar.data);
+                            root.getLocation()
+                            root.close()
                         }
                     }
 
@@ -290,7 +307,7 @@ Popup {
                         }
 
                         onClicked: {
-                            console.log("Cancel - I am pressed, please add me functionality")
+                            root.close()
                         }
                     }
                 }
