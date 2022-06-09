@@ -17,8 +17,11 @@ ApplicationWindow {
     visibility: "FullScreen"
     visible: true
 
-    function printFoo() {
-        console.log("Woooow")
+    property string title: "Some title"
+    property string description: "Some description"
+
+    function showShortRequestInfo(coordinate) {
+
     }
 
     readonly property string genIntColor:   "#4242aa"
@@ -39,26 +42,51 @@ ApplicationWindow {
         property var coor: null
 
         function createMarker(coordinate) {
-            var circle = Qt.createQmlObject('import QtQuick 2.0
-                import QtLocation 5.15
+            var circle = Qt.createQmlObject('
+import QtQuick 2.0
+import QtLocation 5.15
 
-                MapQuickItem {
-                    id: marker
-                    anchorPoint.x: image.width / 2
-                    anchorPoint.y: image.height
-                    width: image.width
-                    height: image.height
-                    sourceItem: Image {
-                        id: image
-                        source: "qrc:/resources/icons/marker.png"
-                        MouseArea {
-                            id:mouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onEntered: {mainWindow.printFoo()}
-                        }
-                    }
-                }', map)
+MapQuickItem {
+    id: marker
+    anchorPoint.x: image.width / 2
+    anchorPoint.y: image.height
+    width: image.width
+    height: image.height
+    sourceItem: Item {
+        Image {
+            id: image
+            source: "qrc:/resources/icons/marker.png"
+            MouseArea {
+                id:mouse
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: {mainWindow.showShortRequestInfo(marker.coordinate); reqWin.visible = true}
+                onExited: {reqWin.visible = false}
+            }
+        }
+
+        ShortRequest {
+            id: reqWin
+
+            visible: false
+
+            title: mainWindow.title
+            description: mainWindow.description
+
+            anchors {
+                bottom: image.top
+                horizontalCenter: image.horizontalCenter
+            }
+            MouseArea {
+                id: mouse2
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: {mainWindow.showShortRequestInfo(marker.coordinate); reqWin.visible = true}
+                onExited: {reqWin.visible = false}
+            }
+        }
+    }
+}', map)
             circle.coordinate = coordinate
             map.marker = circle
             map.addMapItem(circle)
