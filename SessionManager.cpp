@@ -7,36 +7,37 @@
 
 #include <map>
 
-//static Request req {
-//      {1.5, 54.2}
-//    , "Some short description"
-//    , "Very short title"
-//    , {"Category 1", "Category 2"}
-//    , 8
-//};
+static Request req {
+      {1.5, 54.2}
+    , "Some short description"
+    , "Very short title"
+    , {"Category 1", "Category 2"}
+    , 8
+};
 
-//static User user {
-//    "Maksym"
-//  , "Obodinskyi"
-//  , "+380930975704"
-//  , "OMG"
-//  , 999.999
-//};
+static User user {
+    "Maksym"
+  , "Obodinskyi"
+  , "+380930975704"
+  , "OMG"
+  , 999.999
+  , "m.obodinskyy@nltu.lviv.ua"
+};
 
-//static const std::map<int, std::pair<Request, User>> requests
-//{
-//    {1, {req, user}}
-//};
+static const std::map<int, std::pair<Request, User>> requests
+{
+    {1, {req, user}}
+};
 
 SessionManager::SessionManager()
 {
-
+    TRACE();
 }
 
-void SessionManager::getRequests()
+std::map<int, std::pair<Request, User>> SessionManager::getRequests()
 {
     TRACE();
-//    emit updateData(requests);
+    return requests;
 }
 
 void SessionManager::editRequest()
@@ -63,6 +64,7 @@ bool SessionManager::createAccount(QString phone
                                 , QString lastName
                                 , QString email)
 {
+    TRACE();
     _user.lastName = lastName.toStdString();
     _user.name = name.toStdString();
     _user.number = phone.toStdString();
@@ -78,12 +80,14 @@ bool SessionManager::createAccount(QString phone
 
 bool SessionManager::signIn(QString phone, QString password)
 {
+    TRACE();
     INFO("phone - {}, password - {}", phone.toStdString(), password.toStdString());
     return _user.password == password.toStdString();
 }
 
 void SessionManager::setUser(User user)
 {
+    TRACE();
     _user = user;
 
     emit userChanged();
@@ -91,32 +95,38 @@ void SessionManager::setUser(User user)
 
 QString SessionManager::getPhone()
 {
+    TRACE();
     return QString::fromStdString(_user.number);
 }
 
 QString SessionManager::getPassword()
 {
+    TRACE();
     return QString::fromStdString(_user.password);
 }
 
 QString SessionManager::getName()
 {
+    TRACE();
     return QString::fromStdString(_user.name);
 }
 
 QString SessionManager::getLastName()
 {
+    TRACE();
     return QString::fromStdString(_user.lastName);
 }
 
 void SessionManager::declareInQML()
 {
+    TRACE();
     qmlRegisterSingletonType<SessionManager>("session_manager", 1, 0, "SessionManager", SessionManager::singletoneProvider);
 }
 
 
 QObject* SessionManager::singletoneProvider([[maybe_unused]]QQmlEngine * engine, [[maybe_unused]]QJSEngine * scriptEngine)
 {
+    TRACE();
     auto & obj = instance();
     QQmlEngine::setObjectOwnership(&obj, QQmlEngine::CppOwnership);
     return &obj;
@@ -125,6 +135,7 @@ QObject* SessionManager::singletoneProvider([[maybe_unused]]QQmlEngine * engine,
 
 SessionManager & SessionManager::instance()
 {
+    TRACE();
     static SessionManager obj;
     return obj;
 }

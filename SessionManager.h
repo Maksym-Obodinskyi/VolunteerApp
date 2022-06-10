@@ -11,7 +11,7 @@ class SessionManager : public QObject
 {
     Q_OBJECT
 public:
-    void getRequests();
+    std::map<int, std::pair<Request, User>> getRequests();
     void editRequest();
     void addRequests();
     void getByFilter();

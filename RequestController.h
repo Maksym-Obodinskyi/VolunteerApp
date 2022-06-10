@@ -10,7 +10,7 @@ class RequestController : public QObject
 {
     Q_OBJECT
 public:
-    void getRequests();
+    std::map<int, std::pair<Request, User>> getRequests();
     void addToFavorites(const Request & request, const User & user);
     void editRequest();
     void addRequests();

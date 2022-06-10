@@ -66,6 +66,7 @@ std::string ConfigManager::USER_CONFIG_FILE;
 
 ConfigManager::ConfigManager()
 {
+    TRACE();
     struct passwd *pw = getpwuid(getuid());
     CONFIG_DIR = pw->pw_dir;
     CONFIG_DIR += "/.VolunteerApp";
@@ -85,10 +86,13 @@ ConfigManager::ConfigManager()
         std::error_code err;
         INFO("{} file doesn't exist, creating", FAVORITES_FILE);
         std::ofstream file(FAVORITES_FILE);
+
         if (!file.is_open()) {
             ERROR("Failed to create json file: {}", FAVORITES_FILE);
+        } else {
+            file << "[]";
+            file.close();
         }
-        file.close();
     }
 
     USER_CONFIG_FILE = CONFIG_DIR + "/user.json";
