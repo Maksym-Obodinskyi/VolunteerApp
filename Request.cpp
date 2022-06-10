@@ -6,9 +6,9 @@
 #include <QQmlEngine>
 
 Request::Request(std::pair<double, double> _location
-                 , std::string _description
-                 , std::string _title
-                 , std::set<std::string> _categories
+                 , const std::string & _description
+                 , const std::string & _title
+                 , const std::string & _categories
                  , int _date) :
                    QObject(nullptr)
                  , location(_location)
@@ -75,4 +75,24 @@ double Request::getLongitude()
 {
     TRACE();
     return location.second;
+}
+
+QString Request::getDescription()
+{
+  return QString::fromStdString(description);
+}
+
+QString Request::getTitle()
+{
+  return QString::fromStdString(title);
+}
+
+QString Request::getCategories()
+{
+  return QString::fromStdString(categories);
+}
+
+int     Request::getDate()
+{
+  return date;
 }

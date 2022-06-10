@@ -25,7 +25,7 @@ QVariantList RequestManager::getRequests()
     return list;
 }
 
-void RequestManager::addToFavorites(double longtitude
+void RequestManager::addToFavorites(double longitude
                                     , double latitude
                                     , QString title
                                     , QString description
@@ -33,7 +33,7 @@ void RequestManager::addToFavorites(double longtitude
 {
     TRACE();
     _contr.cleanData();
-    _contr.addToFavorites(Request(std::make_pair(longtitude, latitude), title.toStdString(), description.toStdString(), {}, date)
+    _contr.addToFavorites(Request(std::make_pair(longitude, latitude), title.toStdString(), description.toStdString(), {}, date)
                           , User());
 }
 

@@ -207,15 +207,11 @@ void ConfigManager::addToFavorites(const Request & request, const User & user)
     rapidjson::Value requestV;
     requestV.SetObject();
 
-    rapidjson::Value catArr(rapidjson::kArrayType);
-    for (const auto & item : request.categories) {
-        catArr.PushBack(rapidjson::StringRef(item.c_str()), allocator);
-    }
     requestV.AddMember("longitude",     request.location.first,      allocator);
     requestV.AddMember("latitude",      request.location.second,       allocator);
     requestV.AddMember("title",         rapidjson::StringRef(request.title.c_str()),          allocator);
     requestV.AddMember("description",   rapidjson::StringRef(request.description.c_str()),    allocator);
-    requestV.AddMember("categories",    catArr, allocator);
+    requestV.AddMember("categories",    rapidjson::StringRef(request.categories.c_str()), allocator);
     requestV.AddMember("date",          request.date,           allocator);
 
     v.AddMember("Request", requestV, allocator);
@@ -307,24 +303,12 @@ void ConfigManager::getFavorites()
             continue;
         }
 
-        const auto & categoriesField = reqField["categories"];
-
-        if (!categoriesField.IsArray()) {
-            WARNING("Categories field is not array");
-            continue;
-        }
-
-        std::set<std::string> categories;
-        for (auto catIt = categoriesField.Begin(); catIt != categoriesField.End(); catIt++) {
-            categories.insert(catIt->GetString());
-        }
-
         int dateTime        = req["datetime"].GetInt();
         _requests[dateTime] = std::make_pair<Request
                 , User>({{reqField["longitude"].GetDouble(),reqField["latitude"].GetDouble()}
                                                             , reqField["description"].GetString()
                                                             , reqField["title"].GetString()
-                                                            , categories
+                                                            , reqField["categories"].GetString()
                                                             , reqField["date"].GetInt()},
                                                             { userField["name"].GetString()
                                                             , userField["lastname"].GetString()

@@ -8,10 +8,10 @@
 #include <map>
 
 static Request req {
-      {1.5, 54.2}
-    , "Some short description"
-    , "Very short title"
-    , {"Category 1", "Category 2"}
+      {49.83550884520322, 24.02324415870541}
+    , "Very huilo"
+    , "Putin huilo lalalalalalalal"
+    , "Category 1"
     , 8
 };
 

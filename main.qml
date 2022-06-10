@@ -19,10 +19,9 @@ ApplicationWindow {
 
     property string title: "Some title"
     property string description: "Some description"
-
-    function showShortRequestInfo(coordinate) {
-
-    }
+    property double latitude: 0
+    property double longitude: 0
+    property int date: 0
 
     readonly property string genIntColor:   "#4242aa"
     readonly property string userName:      SessionManager.name
@@ -41,17 +40,29 @@ ApplicationWindow {
         property var marker: null
         property var coor: null
 
-        function createMarker(coordinate) {
+        function createMarker(latitude, longitude, title, description, date) {
             var circle = Qt.createQmlObject('
 import QtQuick 2.0
 import QtLocation 5.15
 
 MapQuickItem {
-    id: marker
+    id: root
     anchorPoint.x: image.width / 2
     anchorPoint.y: image.height
     width: image.width
     height: image.height
+
+    coordinate {
+        latitude: root.latitude
+        longitude: root.longitude
+    }
+
+    property alias title: reqWin.title
+    property alias description: reqWin.description
+    property alias latitude: reqWin.latitude
+    property alias longitude: reqWin.longitude
+    property alias date: reqWin.date
+
     sourceItem: Item {
         Image {
             id: image
@@ -60,7 +71,7 @@ MapQuickItem {
                 id:mouse
                 anchors.fill: parent
                 hoverEnabled: true
-                onEntered: {mainWindow.showShortRequestInfo(marker.coordinate); reqWin.visible = true}
+                onEntered: {reqWin.visible = true}
                 onExited: {reqWin.visible = false}
             }
         }
@@ -70,24 +81,18 @@ MapQuickItem {
 
             visible: false
 
-            title: mainWindow.title
-            description: mainWindow.description
-
             anchors {
                 bottom: image.top
                 horizontalCenter: image.horizontalCenter
             }
-            MouseArea {
-                id: mouse2
-                anchors.fill: parent
-                hoverEnabled: true
-                onEntered: {mainWindow.showShortRequestInfo(marker.coordinate); reqWin.visible = true}
-                onExited: {reqWin.visible = false}
-            }
         }
     }
 }', map)
-            circle.coordinate = coordinate
+            circle.latitude = latitude
+            circle.longitude = longitude
+            circle.title = title
+            circle.description = description
+            circle.date = date
             map.marker = circle
             map.addMapItem(circle)
         }
@@ -542,7 +547,7 @@ MapQuickItem {
         var list = RequestManager.getRequests();
         for(var it = 0; it < list.length; it++)
         {
-            map.createMarker(QtPositioning.coordinate(list[it].latitude, list[it].longitude))
+            map.createMarker(list[it].latitude, list[it].longitude, list[it].title, list[it].description, list[it].date)
         }
 
     }
