@@ -508,9 +508,6 @@ MapQuickItem {
             color: "#bb101010"
         }
         contentItem: SignInWindow {
-            onSignedIn: {
-                signInPopup.close()
-            }
             onClose: {
                 signInPopup.close()
                 createAccPopup.open()
@@ -551,4 +548,15 @@ MapQuickItem {
         }
 
     }
+
+      Connections {
+          target: SessionManager
+          onSignedInChanged: {
+              if (SessionManager.signedIn) {
+                  signInPopup.close()
+              } else {
+                  signInPopup.open()
+              }
+          }
+      }
 }

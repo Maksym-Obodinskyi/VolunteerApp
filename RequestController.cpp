@@ -9,6 +9,7 @@
 RequestController::RequestController()
 {
     TRACE();
+
 }
 
 std::map<int, std::pair<Request, User>> RequestController::getRequests()
