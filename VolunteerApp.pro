@@ -1,4 +1,4 @@
-QT += quick network
+QT += quick network sql
 
 SOURCES += \
         ConfigManager.cpp \
@@ -8,7 +8,8 @@ SOURCES += \
         RequestModel.cpp \
         SessionManager.cpp \
         User.cpp \
-        main.cpp
+        main.cpp \
+        message.cpp
 
 RESOURCES += qml.qrc
 
@@ -32,7 +33,9 @@ HEADERS += \
     RequestManager.h \
     RequestModel.h \
     SessionManager.h \
-    User.h
+    User.h \
+    message.h \
+    responce.h
 
 PKGCONFIG +=    fmt \
                 rapidjson

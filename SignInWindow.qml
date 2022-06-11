@@ -11,7 +11,10 @@ Rectangle {
     visible: true
     color: "#4242aa"
 
-    signal signedIn;
+    function failedtoSignIn() {
+        isPwsdOk.visible = true
+    }
+
     signal close;
 
     Text {
@@ -101,12 +104,7 @@ Rectangle {
             anchors.bottomMargin: 20
 
             onClicked: {
-                if (SessionManager.signIn(phoneField.text, pswdField.text)) {
-                    signedIn();
-                    isPwsdOk.visible = false
-                } else {
-                    isPwsdOk.visible = true
-                }
+                SessionManager.signIn(phoneField.text, pswdField.text)
             }
         }
     }

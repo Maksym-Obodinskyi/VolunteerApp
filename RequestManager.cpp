@@ -16,20 +16,16 @@ QVariantList RequestManager::getRequests()
 {
     TRACE();
     QVariantList list;
-    Request req {
-          {49.84004810606953, 24.02204252906137}
-        , "Some short description"
-        , "Very short title"
-        , {"Category 1", "Category 2"}
-        , 8
-    };
     _contr.cleanData();
-    _contr.getRequests();
-    list << QVariant::fromValue(req);
+    auto reqs = _contr.getRequests();
+
+    for (const auto & [_, reqUser] : reqs) {
+        list << QVariant::fromValue(reqUser.first);
+    }
     return list;
 }
 
-void RequestManager::addToFavorites(double longtitude
+void RequestManager::addToFavorites(double longitude
                                     , double latitude
                                     , QString title
                                     , QString description
@@ -37,7 +33,7 @@ void RequestManager::addToFavorites(double longtitude
 {
     TRACE();
     _contr.cleanData();
-    _contr.addToFavorites(Request(std::make_pair(longtitude, latitude), title.toStdString(), description.toStdString(), {}, date)
+    _contr.addToFavorites(Request(std::make_pair(longitude, latitude), title.toStdString(), description.toStdString(), {}, date)
                           , User());
 }
 
@@ -84,12 +80,14 @@ void RequestManager::getUsersRequests()
 
 void RequestManager::declareInQML()
 {
+    TRACE();
     qmlRegisterSingletonType<RequestManager>("request_manager", 1, 0, "RequestManager", RequestManager::singletoneProvider);
 }
 
 
 QObject* RequestManager::singletoneProvider([[maybe_unused]]QQmlEngine * engine, [[maybe_unused]]QJSEngine * scriptEngine)
 {
+    TRACE();
     auto & obj = instance();
     QQmlEngine::setObjectOwnership(&obj, QQmlEngine::CppOwnership);
     return &obj;
@@ -97,6 +95,7 @@ QObject* RequestManager::singletoneProvider([[maybe_unused]]QQmlEngine * engine,
 
 RequestManager& RequestManager::instance()
 {
+    TRACE();
     static RequestManager inst;
     return inst;
 }

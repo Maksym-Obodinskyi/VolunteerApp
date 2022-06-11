@@ -9,11 +9,13 @@
 RequestController::RequestController()
 {
     TRACE();
+
 }
 
-void RequestController::getRequests()
+std::map<int, std::pair<Request, User>> RequestController::getRequests()
 {
     TRACE();
+    return SessionManager::instance().getRequests();
 }
 
 void RequestController::addToFavorites(const Request & request, const User & user)
@@ -64,6 +66,7 @@ void RequestController::cleanData()
 
 RequestController& RequestController::instance()
 {
+    TRACE();
     static RequestController inst;
     return inst;
 }

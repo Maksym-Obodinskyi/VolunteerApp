@@ -17,9 +17,11 @@ ApplicationWindow {
     visibility: "FullScreen"
     visible: true
 
-    function printFoo() {
-        console.log("Woooow")
-    }
+    property string title: "Some title"
+    property string description: "Some description"
+    property double latitude: 0
+    property double longitude: 0
+    property int date: 0
 
     readonly property string genIntColor:   "#4242aa"
     readonly property string userName:      SessionManager.name
@@ -38,28 +40,59 @@ ApplicationWindow {
         property var marker: null
         property var coor: null
 
-        function createMarker(coordinate) {
-            var circle = Qt.createQmlObject('import QtQuick 2.0
-                import QtLocation 5.15
+        function createMarker(latitude, longitude, title, description, date) {
+            var circle = Qt.createQmlObject('
+import QtQuick 2.0
+import QtLocation 5.15
 
-                MapQuickItem {
-                    id: marker
-                    anchorPoint.x: image.width / 2
-                    anchorPoint.y: image.height
-                    width: image.width
-                    height: image.height
-                    sourceItem: Image {
-                        id: image
-                        source: "qrc:/resources/icons/marker.png"
-                        MouseArea {
-                            id:mouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onEntered: {mainWindow.printFoo()}
-                        }
-                    }
-                }', map)
-            circle.coordinate = coordinate
+MapQuickItem {
+    id: root
+    anchorPoint.x: image.width / 2
+    anchorPoint.y: image.height
+    width: image.width
+    height: image.height
+
+    coordinate {
+        latitude: root.latitude
+        longitude: root.longitude
+    }
+
+    property alias title: reqWin.title
+    property alias description: reqWin.description
+    property alias latitude: reqWin.latitude
+    property alias longitude: reqWin.longitude
+    property alias date: reqWin.date
+
+    sourceItem: Item {
+        Image {
+            id: image
+            source: "qrc:/resources/icons/marker.png"
+            MouseArea {
+                id:mouse
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: {reqWin.visible = true}
+                onExited: {reqWin.visible = false}
+            }
+        }
+
+        ShortRequest {
+            id: reqWin
+
+            visible: false
+
+            anchors {
+                bottom: image.top
+                horizontalCenter: image.horizontalCenter
+            }
+        }
+    }
+}', map)
+            circle.latitude = latitude
+            circle.longitude = longitude
+            circle.title = title
+            circle.description = description
+            circle.date = date
             map.marker = circle
             map.addMapItem(circle)
         }
@@ -475,9 +508,6 @@ ApplicationWindow {
             color: "#bb101010"
         }
         contentItem: SignInWindow {
-            onSignedIn: {
-                signInPopup.close()
-            }
             onClose: {
                 signInPopup.close()
                 createAccPopup.open()
@@ -514,8 +544,19 @@ ApplicationWindow {
         var list = RequestManager.getRequests();
         for(var it = 0; it < list.length; it++)
         {
-            map.createMarker(QtPositioning.coordinate(list[it].latitude, list[it].longitude))
+            map.createMarker(list[it].latitude, list[it].longitude, list[it].title, list[it].description, list[it].date)
         }
 
     }
+
+      Connections {
+          target: SessionManager
+          onSignedInChanged: {
+              if (SessionManager.signedIn) {
+                  signInPopup.close()
+              } else {
+                  signInPopup.open()
+              }
+          }
+      }
 }

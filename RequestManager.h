@@ -16,7 +16,7 @@ public:
     static RequestManager& instance();
 
     Q_INVOKABLE QVariantList getRequests();
-    Q_INVOKABLE void addToFavorites(double longtitude
+    Q_INVOKABLE void addToFavorites(double longitude
                                     , double latitude
                                     , QString title
                                     , QString description

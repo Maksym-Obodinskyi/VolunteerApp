@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QQmlEngine>
+#include <QTcpSocket>
+
+#include <condition_variable>
 
 #include "Request.h"
 #include "User.h"
@@ -11,7 +14,7 @@ class SessionManager : public QObject
 {
     Q_OBJECT
 public:
-    void getRequests();
+    std::map<int, std::pair<Request, User>> getRequests();
     void editRequest();
     void addRequests();
     void getByFilter();
@@ -21,12 +24,14 @@ public:
     Q_PROPERTY(QString phone READ getPhone NOTIFY userChanged)
     Q_PROPERTY(QString password READ getPassword)
 
-    Q_INVOKABLE bool createAccount(QString phone
+    Q_PROPERTY(bool signedIn READ getSignedIn NOTIFY signedInChanged)
+
+    Q_INVOKABLE void createAccount(QString phone
                                    , QString password
                                    , QString name
                                    , QString lastName
                                    , QString email);
-    Q_INVOKABLE bool signIn(QString phone, QString password);
+    Q_INVOKABLE void signIn(QString phone, QString password);
 
     static SessionManager & instance();
     static void declareInQML();
@@ -38,10 +43,16 @@ public:
     QString getPassword();
     QString getName();
     QString getLastName();
+    bool getSignedIn();
+    void setSignedIn(bool);
 
 signals:
     void updateData(std::map<int, std::pair<Request, User>>);
     void userChanged();
+    void signedInChanged();
+
+private slots:
+    void onReadyRead();
 
 private:
     SessionManager();
@@ -49,6 +60,11 @@ private:
     SessionManager(const SessionManager &&) = delete;
     SessionManager& operator=(const SessionManager &) = delete;
     SessionManager& operator=(const SessionManager &&) = delete;
+
+    bool signedIn;
+    int errorCode{-1};
+
+    QTcpSocket socket;
 
     User _user;
 };

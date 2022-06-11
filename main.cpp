@@ -1,3 +1,7 @@
+#define LOG_CATEGORY "MAIN"
+#define LOG_LEVEL _TRACE_
+#include "Logger.h"
+
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
@@ -15,6 +19,7 @@ namespace fs = std::filesystem;
 
 int main(int argc, char *argv[])
 {
+    TRACE();
     RequestManager::declareInQML();
     RequestModel::declareInQML();
     SessionManager::declareInQML();
@@ -44,5 +49,5 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
     engine.load(url);
 
-return app.exec();
+    return app.exec();
 }

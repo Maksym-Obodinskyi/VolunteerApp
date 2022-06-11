@@ -1,3 +1,7 @@
+#define LOG_CATEGORY    "User"
+#define LOG_LEVEL       _TRACE_
+#include "Logger.h"
+
 #include "User.h"
 
 User::User(std::string _name
@@ -15,5 +19,5 @@ User::User(std::string _name
           , email(_email)
           , password(_password)
 {
-
+    TRACE();
 }

@@ -9,9 +9,9 @@ struct Request : public QObject
     Q_GADGET
 public:
     Request(std::pair<double, double> _location
-          , std::string _description
-          , std::string _title
-          , std::set<std::string> _categories
+          , const std::string & _description
+          , const std::string & _title
+          , const std::string & _categories
           , int _date);
     Request() : QObject(nullptr) {}
     Request(const Request & req);
@@ -23,14 +23,22 @@ public:
 
     Q_PROPERTY(double latitude READ getLatitude)
     Q_PROPERTY(double longitude READ getLongitude)
+    Q_PROPERTY(QString title READ getTitle)
+    Q_PROPERTY(QString description READ getDescription)
+    Q_PROPERTY(QString categories READ getCategories)
+    Q_PROPERTY(int date READ getDate)
 
     double getLatitude();
     double getLongitude();
+    QString getDescription();
+    QString getTitle();
+    QString getCategories();
+    int getDate();
 
     std::pair<double, double> location;
     std::string description;
     std::string title;
-    std::set<std::string> categories;
+    std::string categories;
     int date;
 };
 

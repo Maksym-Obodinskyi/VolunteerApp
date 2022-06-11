@@ -19,5 +19,7 @@
         <file>resources/icons/marker.png</file>
         <file>MapMarker.qml</file>
         <file>ShortRequest.qml</file>
+        <file>resources/icons/star.png</file>
+        <file>resources/icons/starFilled.png</file>
     </qresource>
 </RCC>

@@ -41,6 +41,7 @@ void RequestModel::updateData(std::map<int, std::pair<Request, User>> data)
 
 void RequestModel::cleanData()
 {
+    TRACE();
     if (_data.empty()) {
         return;
     }
@@ -104,5 +105,6 @@ QHash<int, QByteArray> RequestModel::roleNames() const
 
 void RequestModel::declareInQML()
 {
+    TRACE();
     qmlRegisterType<RequestModel>("request_model", 1, 0, "RequestModel");
 }
