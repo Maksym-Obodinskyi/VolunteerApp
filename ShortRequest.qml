@@ -15,8 +15,8 @@ Rectangle {
 
     property string title: ""
     property string description: ""
-    property double latitude: 0
-    property double longitude: 0
+    property real latitude: 0
+    property real longitude: 0
     property int date: 0
     property bool starred: false
 

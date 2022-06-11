@@ -490,7 +490,34 @@ QByteArray MessageUpdateProfile::serialize()
 QByteArray MessageAddRequest::serialize()
 {
     TRACE();
-    return QByteArray();
+    QByteArray body;
+    body += requestInfo.UserPhone.toUtf8();
+    body += ':';
+    body += QString::number(requestInfo._location.E).toUtf8();
+    body += ':';
+    body += QString::number(requestInfo._location.N).toUtf8();
+    body += ':';
+    body += requestInfo.description.toUtf8();
+    body += ':';
+    body += requestInfo.title.toUtf8();
+    body += ':';
+    body += requestInfo.categories.toUtf8();
+    body += ':';
+    body += requestInfo.date;
+    body += ':';
+    body += requestInfo.targetDate;
+
+    QByteArray ret;
+    ret += 'a';
+    ret += ':';
+    char res[64];
+    [[maybe_unused]] auto [ptr, ec] = std::to_chars(res, res + 64, body.size());
+    ret.append(res, ptr - res);
+    ret += '|';
+
+    ret += body;
+
+    return ret;
 }
 
 QByteArray MessageGetRequest::serialize()

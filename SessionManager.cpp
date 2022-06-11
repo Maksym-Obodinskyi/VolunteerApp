@@ -93,7 +93,13 @@ void SessionManager::onReadyRead()
                 setAccountCreated(false);
             }
             break;
-//        }
+        }
+        case 'a':
+        {
+            resp.reset(new AddRequestResponce);
+            resp->deserialize(datas.constData() + 2);
+            break;
+        }
 //        case 'd':
 //        {
 //            resp = new LogOutResponce;
@@ -103,10 +109,6 @@ void SessionManager::onReadyRead()
         //            resp = new UpdateProfileResponce;
         //        }
         //        case 'u':
-        //        {
-        //            resp = new LogInResponce;
-        //        }
-        //        case 'a':
         //        {
         //            resp = new LogInResponce;
         //        }
@@ -136,10 +138,22 @@ void SessionManager::editRequest()
 //    emit updateData(requests);
 }
 
-void SessionManager::addRequests()
+void SessionManager::addRequest(const Request & req)
 {
     TRACE();
-//    emit updateData(requests);
+    MessageAddRequest msg;
+
+    msg.setRequestInfo(_user.number.c_str(),
+                       req.location.first,
+                       req.location.second,
+                       req.description.c_str(),
+                       req.title.c_str(),
+                       req.categories.c_str(),
+                       0,
+                       req.date);
+
+
+    socket.write(msg.serialize());
 }
 
 void SessionManager::getByFilter()

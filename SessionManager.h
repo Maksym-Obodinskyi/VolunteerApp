@@ -16,7 +16,7 @@ class SessionManager : public QObject
 public:
     std::map<int, std::pair<Request, User>> getRequests();
     void editRequest();
-    void addRequests();
+    void addRequest(const Request & req);
     void getByFilter();
 
     Q_PROPERTY(QString name READ getName NOTIFY userChanged)
