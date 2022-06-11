@@ -325,37 +325,31 @@ void ConfigManager::getFavorites()
 void ConfigManager::saveUser(const User & user)
 {
     TRACE();
+    INFO("name - {}, lastName = {}, number - {}, password - {}, email - {}"
+         , user.name
+         , user.lastName
+         , user.number
+         , user.password
+         , user.email);
     rapidjson::Document json;
     auto & allocator = json.GetAllocator();
     rapidjson::Value userV;
     json.SetObject();
 
     json.AddMember("name",         rapidjson::StringRef(user.name.c_str()),     allocator);
-    TRACE();
     json.AddMember("lastname",     rapidjson::StringRef(user.lastName.c_str()),     allocator);
-    TRACE();
     json.AddMember("number",       rapidjson::StringRef(user.number.c_str()), allocator);
-    TRACE();
     json.AddMember("photo",        rapidjson::StringRef(user.photo.c_str()),    allocator);
-    TRACE();
     json.AddMember("rating",       user.rating,   allocator);
-    TRACE();
     json.AddMember("password",     rapidjson::StringRef(user.password.c_str()),    allocator);
-    TRACE();
     json.AddMember("email",        rapidjson::StringRef(user.email.c_str()),    allocator);
-    TRACE();
 
     FILE* fp = fopen(USER_CONFIG_FILE.c_str(), "w");
-    TRACE();
 
     char writeBuffer[65536];
-    TRACE();
     rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
-    TRACE();
 
     rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
-    TRACE();
     json.Accept(writer);
-    TRACE();
     fclose(fp);
 }

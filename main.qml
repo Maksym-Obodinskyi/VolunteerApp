@@ -508,7 +508,9 @@ MapQuickItem {
             color: "#bb101010"
         }
         contentItem: SignInWindow {
-            onClose: {
+            id: signIn
+            failedToSignIn: false
+            onCreateAccount: {
                 signInPopup.close()
                 createAccPopup.open()
             }
@@ -527,9 +529,8 @@ MapQuickItem {
             color: "#bb101010"
         }
         contentItem: CreateAccWin {
-            onCreated: {
-                createAccPopup.close()
-            }
+            id: createAcc
+            failedToCreate: false
             onBack: {
                 createAccPopup.close()
                 signInPopup.open()
@@ -546,17 +547,28 @@ MapQuickItem {
         {
             map.createMarker(list[it].latitude, list[it].longitude, list[it].title, list[it].description, list[it].date)
         }
-
     }
 
-      Connections {
-          target: SessionManager
-          function onSignedInChanged() {
-              if (SessionManager.signedIn) {
-                  signInPopup.close()
-              } else {
-                  signInPopup.open()
-              }
+    Connections {
+      target: SessionManager
+      function onSignedInChanged() {
+          if (SessionManager.signedIn) {
+              signInPopup.close()
+              signIn.failedToSignIn = false
+          } else {
+              signIn.failedToSignIn = true
+              signInPopup.open()
           }
       }
+
+      function onAccountCreatedChanged() {
+          if (SessionManager.accountCreated) {
+              createAccPopup.close()
+              signIn.failedToSignIn = false
+          } else {
+              createAccPopup.open()
+              signIn.failedToSignIn = true
+          }
+      }
+    }
 }

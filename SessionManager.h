@@ -25,6 +25,7 @@ public:
     Q_PROPERTY(QString password READ getPassword)
 
     Q_PROPERTY(bool signedIn READ getSignedIn NOTIFY signedInChanged)
+    Q_PROPERTY(bool accountCreated READ getAccountCreated NOTIFY accountCreatedChanged)
 
     Q_INVOKABLE void createAccount(QString phone
                                    , QString password
@@ -37,7 +38,7 @@ public:
     static void declareInQML();
     static QObject* singletoneProvider(QQmlEngine * engine, QJSEngine * scriptEngine);
 
-    void setUser(User user);
+    void setUser(const User &user);
 
     QString getPhone();
     QString getPassword();
@@ -45,11 +46,14 @@ public:
     QString getLastName();
     bool getSignedIn();
     void setSignedIn(bool);
+    bool getAccountCreated();
+    void setAccountCreated(bool);
 
 signals:
     void updateData(std::map<int, std::pair<Request, User>>);
     void userChanged();
     void signedInChanged();
+    void accountCreatedChanged();
 
 private slots:
     void onReadyRead();
@@ -62,9 +66,12 @@ private:
     SessionManager& operator=(const SessionManager &&) = delete;
 
     bool signedIn;
+    bool accountCreated;
     int errorCode{-1};
 
     QTcpSocket socket;
+
+    User _toCreate;
 
     User _user;
 };

@@ -21,3 +21,25 @@ User::User(std::string _name
 {
     TRACE();
 }
+
+User::User(const User & rhs)
+{
+    name = rhs.name;
+    lastName = rhs.lastName;
+    number= rhs.number;
+    photo = rhs.photo;
+    rating = rhs.rating;
+    email = rhs.email;
+    password = rhs.password;
+}
+
+User& User::operator=(const User & rhs)
+{
+    name = rhs.name;
+    lastName = rhs.lastName;
+    number= rhs.number;
+    photo = rhs.photo;
+    rating = rhs.rating;
+    email = rhs.email;
+    password = rhs.password;
+}
