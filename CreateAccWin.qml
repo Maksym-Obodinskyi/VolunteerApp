@@ -10,8 +10,9 @@ Rectangle {
     id: root
 
     visible: true
-    color: "#4242aa"
+    radius: 30
 
+    property alias genIntColor: root.color
     property bool failedToCreate: false
 
     signal created;
@@ -28,18 +29,33 @@ Rectangle {
         font.pointSize: 20
         color: "white"
     }
-    Item {
-        id: writePhone
+
+    DelimiterLine {
+        id: headerDel
+        property int margins: root.radius
         anchors {
             top: title.bottom
             left: parent.left
             right: parent.right
-            topMargin: 50
+            topMargin: 10
+            leftMargin: margins
+            rightMargin: margins
+        }
+    }
+
+    Item {
+        id: writePhone
+        anchors {
+            top: headerDel.bottom
+            left: parent.left
+            right: parent.right
+            topMargin: 40
             leftMargin: 30
             rightMargin: 30
         }
 
-        property int inputWidth:  width / 2 - 10
+        property int inputWidth:  width / 2 - 15
+        property int inputTopMargins: 20
 
         VTextInput {
             id: phoneField
@@ -67,7 +83,7 @@ Rectangle {
             height: 50
             anchors.top: phoneField.bottom
             anchors.left: parent.left
-            anchors.topMargin: 20
+            anchors.topMargin: writePhone.inputTopMargins
             maximumLength: 25
             placeholderText: qsTr("Name")
         }
@@ -78,7 +94,7 @@ Rectangle {
             height: 50
             anchors.top: emailField.bottom
             anchors.right: parent.right
-            anchors.topMargin: 20
+            anchors.topMargin: writePhone.inputTopMargins
             maximumLength: 25
             placeholderText: qsTr("Last name")
         }
@@ -90,7 +106,7 @@ Rectangle {
             height: 50
             anchors.top: nameField.bottom
             anchors.left: parent.left
-            anchors.topMargin: 20
+            anchors.topMargin: writePhone.inputTopMargins
             maximumLength: 35
             echoMode: TextInput.Password
             placeholderText: qsTr("Password")
@@ -110,7 +126,7 @@ Rectangle {
             height: 50
             anchors.top: lastNameField.bottom
             anchors.right: parent.right
-            anchors.topMargin: 20
+            anchors.topMargin: writePhone.inputTopMargins
             maximumLength: 35
             echoMode: TextInput.Password
             placeholderText: qsTr("Confirm")
@@ -138,18 +154,23 @@ Rectangle {
     }
 
     Item {
-        width: parent.width
         height: 50
-        anchors.bottom: parent.bottom
+
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            leftMargin: 30
+            rightMargin: 30
+        }
 
         VButton {
             id: backButton
             height: 50
-            width: 100
+            width: 200
             anchors.left: parent.left
-            anchors.leftMargin: 20
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 20
+            anchors.bottomMargin: 30
             text: qsTr("Back")
             onClicked: back()
         }
@@ -158,11 +179,10 @@ Rectangle {
             id: nextButton
             text: qsTr("Create")
             height: 50
-            width: 100
+            width: 200
             anchors.right: parent.right
-            anchors.rightMargin: 20
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 20
+            anchors.bottomMargin: 30
 
             onClicked: {
                 if (!isPwsdOk.visible) {
@@ -172,68 +192,3 @@ Rectangle {
         }
     }
 }
-
-//VTextInput {
-//    id: phoneField
-//    width:  parent.width
-//    height: 50
-//    anchors.top: parent.top
-//    anchors.left: parent.left
-//    anchors.leftMargin: 20
-//    maximumLength: 13
-//    placeholderText: qsTr("Enter phone")
-//}
-
-//VTextInput {
-//    id: pswdField
-
-//    width:  parent.width
-//    height: 50
-//    anchors.top: phoneField.bottom
-//    anchors.left: parent.left
-//    anchors.topMargin: 20
-//    anchors.leftMargin: 20
-//    maximumLength: 35
-//    echoMode: TextInput.Password
-//    placeholderText: qsTr("Enter password")
-//    onTextChanged: {
-//        if (pswdField.text !== pswdFieldAgain.text) {
-//            isPwsdOk.text = qsTr("Passwords are different")
-//        } else {
-//            isPwsdOk.text = ""
-//        }
-//    }
-//}
-
-//VTextInput {
-//    id: pswdFieldAgain
-
-//    width:  parent.width
-//    height: 50
-//    anchors.top: pswdField.bottom
-//    anchors.left: parent.left
-//    anchors.topMargin: 20
-//    anchors.leftMargin: 20
-//    maximumLength: 35
-//    echoMode: TextInput.Password
-//    placeholderText: qsTr("Repeat your password")
-
-//    onTextChanged: {
-//        if (pswdField.text !== pswdFieldAgain.text) {
-//            isPwsdOk.text = qsTr("Passwords are different")
-//        } else {
-//            isPwsdOk.text = ""
-//        }
-//    }
-//}
-
-//Text {
-//    id: isPwsdOk
-//    anchors {
-//        left: parent.left
-//        right: parent.right
-//        top: pswdFieldAgain.bottom
-//        topMargin: 20
-//        leftMargin: 20
-//    }
-//}

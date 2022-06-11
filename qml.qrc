@@ -22,5 +22,8 @@
         <file>resources/icons/star.png</file>
         <file>resources/icons/starFilled.png</file>
         <file>LongRequest.qml</file>
+        <file>VText.qml</file>
+        <file>resources/icons/whiteStar.png</file>
+        <file>resources/icons/yellowStar.png</file>
     </qresource>
 </RCC>

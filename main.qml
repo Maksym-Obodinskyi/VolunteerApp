@@ -23,8 +23,9 @@ ApplicationWindow {
     property double longitude: 0
     property int date: 0
 
-    readonly property string genIntColor:   "#4242aa"
+    readonly property string genIntColor:   "#00897b"
     readonly property string userName:      SessionManager.name
+    readonly property string userLastName:  SessionManager.lastName
     readonly property string userNumber:    SessionManager.phone
     readonly property string fontColor:     "white"
 
@@ -80,10 +81,14 @@ MapQuickItem {
             id: reqWin
 
             visible: false
+            genIntColor: mainWindow.genIntColor
 
             anchors {
                 bottom: image.top
                 horizontalCenter: image.horizontalCenter
+            }
+            onOpenLongReq: {
+                longReq.open()
             }
         }
     }
@@ -164,6 +169,25 @@ MapQuickItem {
                 }
             }
         }
+    }
+
+    LongRequest {
+        id: longReq
+
+        visible: false
+
+        genIntColor: mainWindow.genIntColor
+
+        function open() {
+            visible = true
+        }
+
+        function close() {
+            visible = false
+        }
+
+        anchors.centerIn: parent
+
     }
 
     Plugin {
@@ -279,11 +303,10 @@ MapQuickItem {
                         }
                     }
 
-                    Text {
+                    VText {
                         id: menuUserName
 
-                        text: mainWindow.userName
-                        color: mainWindow.fontColor
+                        text: mainWindow.userName + " " + mainWindow.userLastName
 
                         anchors {
                             top: userMenuPhoto.bottom
@@ -293,11 +316,10 @@ MapQuickItem {
                         }
                     }
 
-                    Text {
+                    VText {
                         id: menuUserNumber
 
                         text: mainWindow.userNumber
-                        color: mainWindow.fontColor
 
                         anchors {
                             top: menuUserName.bottom
@@ -333,8 +355,10 @@ MapQuickItem {
                 PanelButton {
                     id: usersRequestsBtn
 
-                    btnText: qsTr("My Requests")
+                    text: qsTr("My Requests")
                     height: bottomPanel.btnHeight
+
+                    genIntColor: mainWindow.genIntColor
 
                     anchors {
                         left: parent.left
@@ -351,8 +375,12 @@ MapQuickItem {
                 PanelButton {
                     id: lastBtn
 
-                    btnText: qsTr("Recently viewed")
+                    text: qsTr("Recently viewed")
                     height: bottomPanel.btnHeight
+
+                    enabled: false
+
+                    genIntColor: mainWindow.genIntColor
 
                     anchors {
                         left: parent.left
@@ -369,8 +397,10 @@ MapQuickItem {
                 PanelButton {
                     id: favoritesBtn
 
-                    btnText: qsTr("Favorites")
+                    text: qsTr("Favorites")
                     height: bottomPanel.btnHeight
+
+                    genIntColor: mainWindow.genIntColor
 
                     anchors {
                         left: parent.left
@@ -387,8 +417,10 @@ MapQuickItem {
                 PanelButton {
                     id: settingsBtn
 
-                    btnText: qsTr("Settings")
+                    text: qsTr("Settings")
                     height: bottomPanel.btnHeight
+
+                    genIntColor: mainWindow.genIntColor
 
                     anchors {
                         left: parent.left
@@ -417,7 +449,7 @@ MapQuickItem {
 
             Rectangle {
                 id: requestsListRect
-                property int openedWidth: 640
+                property int openedWidth: 440
                 width: 0
                 anchors {
                     left: menuVertDel.right
@@ -449,9 +481,6 @@ MapQuickItem {
                 visible: requestsListRect.opened()
 
                 model: reqModel
-//                spacing: 5
-//                clip: true
-//                headerPositioning: ListView.OverlayHeader
                 delegate: Rectangle {
                     id: reqBackground
 
@@ -461,7 +490,7 @@ MapQuickItem {
                     }
 
                     height: 100
-                    color: "pink"
+                    color: reqMenuItem.pressed ? "#00796b" : reqMenuItem.containsMouse ? "#009688" : genIntColor
 
                     UserPhoto {
                         id: reqPhoto
@@ -475,31 +504,51 @@ MapQuickItem {
 
                     }
 
-                    Text {
+                    VText {
                         id: reqTitle
 
                         text: model.title
                         wrapMode: Text.Wrap
-//                        height: requestsView.textHeight
+                        horizontalAlignment: Text.AlignHCenter
                         anchors {
+                            top: parent.top
                             left: reqPhoto.right
                             right: parent.right
-                            top: parent.top
+                            topMargin: 5
                         }
                     }
 
-                    Text {
+                    VText {
                         id: reqDesc
                         text: model.description
                         wrapMode: Text.Wrap
-//                        height: requestsView.textHeight
+                        font.pixelSize: 16
+                        horizontalAlignment: Text.AlignHCenter
+                        clip: true
+                        elide: Text.ElideRight
                         anchors {
+                            top: reqTitle.bottom
                             left: reqPhoto.right
                             right: parent.right
-                            top: reqTitle.bottom
                             bottom: parent.bottom
+                            topMargin: 5
                         }
                     }
+
+                    MouseArea {
+                        id: reqMenuItem
+                        anchors.fill: parent
+                        hoverEnabled: true
+                    }
+
+//                    DelimiterLine {
+//                        height: 2
+//                        anchors {
+//                            left: parent.left
+//                            right: parent.right
+//                            bottom: parent.bottom
+//                        }
+//                    }
                 }
             }
 
@@ -524,6 +573,7 @@ MapQuickItem {
     AddRequestPopup {
         id: addRequestPopup
         anchors.centerIn: parent
+        genIntColor: mainWindow.genIntColor
         onGetLocation: {
             map.isGetLocation = true
         }
@@ -543,6 +593,7 @@ MapQuickItem {
         contentItem: SignInWindow {
             id: signIn
             failedToSignIn: false
+            genIntColor: mainWindow.genIntColor
             onCreateAccount: {
                 signInPopup.close()
                 createAccPopup.open()
@@ -557,13 +608,14 @@ MapQuickItem {
         closePolicy: Popup.CloseOnPressOutside
         background: null
         width: 600
-        height: 500
+        height: 460
         Overlay.modal: Rectangle {
             color: "#bb101010"
         }
         contentItem: CreateAccWin {
             id: createAcc
             failedToCreate: false
+            genIntColor: mainWindow.genIntColor
             onBack: {
                 createAccPopup.close()
                 signInPopup.open()

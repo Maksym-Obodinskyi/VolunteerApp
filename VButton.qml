@@ -4,7 +4,7 @@ Rectangle {
     id: root
     property alias  text: text.text
     property string activeColor: "grey"
-    radius: 5
+    radius: 10
 
     signal clicked
 
@@ -12,7 +12,10 @@ Rectangle {
 
     Text {
         id: text
+        font.pixelSize: 17
         anchors.centerIn: parent
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
     }
 
     MouseArea {

@@ -47,10 +47,6 @@ void SessionManager::onReadyRead()
     QByteArray datas = socket.readAll();
     DEBUG("datas: {}", datas.toStdString());
 
-    for (auto byte : datas) {
-        INFO("{}", byte);
-    }
-
     std::unique_ptr<Responce> resp;
 
     char comm;
