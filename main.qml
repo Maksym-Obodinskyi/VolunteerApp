@@ -551,7 +551,7 @@ MapQuickItem {
 
       Connections {
           target: SessionManager
-          onSignedInChanged: {
+          function onSignedInChanged() {
               if (SessionManager.signedIn) {
                   signInPopup.close()
               } else {

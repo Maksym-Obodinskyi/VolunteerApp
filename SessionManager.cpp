@@ -51,12 +51,12 @@ void SessionManager::onReadyRead()
         INFO("{}", byte);
     }
 
-    Responce * resp;
+    std::unique_ptr<Responce> resp;
 
     char comm;
 
 
-    if (datas.size() > 3) {
+    if (datas.size() >= 3) {
         comm = datas[0];
         if (datas[1] != ':') {
             WARNING("Unrecognized protocol");
@@ -69,9 +69,10 @@ void SessionManager::onReadyRead()
     {
         case 'l':
         {
-            resp = new LogInResponce;
+            resp.reset(new LogInResponce);
             resp->deserialize(datas.constData() + 2);
             setSignedIn(resp->err == 0);
+
             break;
         }
         //        case 'd':
