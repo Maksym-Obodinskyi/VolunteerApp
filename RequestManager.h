@@ -16,13 +16,17 @@ public:
     static RequestManager& instance();
 
     Q_INVOKABLE QVariantList getRequests();
-    Q_INVOKABLE void addToFavorites(double longitude
-                                    , double latitude
+    Q_INVOKABLE void addToFavorites(double latitude
+                                    , double longitude
                                     , QString title
                                     , QString description
                                     , int date);
     Q_INVOKABLE void editRequest();
-    Q_INVOKABLE void addRequest(const Request & request);
+    Q_INVOKABLE void addRequest(double latitude
+                                , double longitude
+                                , QString title
+                                , QString description
+                                , int date);
     Q_INVOKABLE void getByFilter(const std::set<const std::string &> & categories);
     Q_INVOKABLE void getFavoritesList();
     Q_INVOKABLE void getLastViewedList();

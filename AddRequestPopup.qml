@@ -19,7 +19,7 @@ Popup {
     signal getLocation;
 
     function addRequest(latitude, longitude) {
-        RequestManager.addToFavorites(latitude, longitude
+        RequestManager.addRequest(latitude, longitude
                                       , titleTextInput.text
                                       , descInput.text
                                       , calendar.data);

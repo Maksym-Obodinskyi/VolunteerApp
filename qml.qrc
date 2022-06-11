@@ -21,5 +21,6 @@
         <file>ShortRequest.qml</file>
         <file>resources/icons/star.png</file>
         <file>resources/icons/starFilled.png</file>
+        <file>LongRequest.qml</file>
     </qresource>
 </RCC>

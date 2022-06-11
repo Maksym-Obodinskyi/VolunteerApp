@@ -12,6 +12,8 @@ Rectangle {
     visible: true
     color: "#4242aa"
 
+    property bool failedToCreate: false
+
     signal created;
     signal back;
 
@@ -124,7 +126,7 @@ Rectangle {
         Text {
             id: isPwsdOk
             text: qsTr("Passwords are different")
-            visible: false
+            visible: root.failedToCreate
             anchors {
                 left: parent.left
                 right: parent.right
@@ -163,19 +165,13 @@ Rectangle {
             anchors.bottomMargin: 20
 
             onClicked: {
-                if (!isPwsdOk.visible && SessionManager.createAccount(phoneField.text, pswdField.text, nameField.text, lastNameField.text, emailField.text)) {
-                    created();
-                    isPwsdOk.visible = false
-                } else {
-                    isPwsdOk.visible = true
+                if (!isPwsdOk.visible) {
+                    SessionManager.createAccount(phoneField.text, pswdField.text, nameField.text, lastNameField.text, emailField.text)
                 }
             }
         }
     }
 }
-
-
-
 
 //VTextInput {
 //    id: phoneField

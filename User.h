@@ -12,6 +12,8 @@ struct User
        , std::string _email
        , std::string _password = std::string());
     User() {}
+    User(const User & rhs);
+    User& operator=(const User & rhs);
     std::string name;
     std::string lastName;
     std::string number;

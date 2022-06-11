@@ -34,7 +34,7 @@ static const std::map<int, std::pair<Request, User>> requests
     {1, {req, user}}
 };
 
-SessionManager::SessionManager()
+SessionManager::SessionManager() : signedIn(false), accountCreated(false)
 {
     TRACE();
     socket.connectToHost(QHostAddress("127.0.0.1"), 4243);
@@ -51,17 +51,18 @@ void SessionManager::onReadyRead()
         INFO("{}", byte);
     }
 
-    Responce * resp;
+    std::unique_ptr<Responce> resp;
 
     char comm;
 
 
-    if (datas.size() > 3) {
+    if (datas.size() >= 3) {
         comm = datas[0];
         if (datas[1] != ':') {
             WARNING("Unrecognized protocol");
         }
     } else {
+        ERROR("Size is so small - {}", datas.size());
         return;
     }
 
@@ -69,28 +70,45 @@ void SessionManager::onReadyRead()
     {
         case 'l':
         {
-            resp = new LogInResponce;
+            TRACE();
+            resp.reset(new LogInResponce);
             resp->deserialize(datas.constData() + 2);
             setSignedIn(resp->err == 0);
+            ConfigManager::instance().saveUser(_user);
             break;
         }
-        //        case 'd':
-        //        {
-        //            resp = new LogOutResponce;
-        //        }
+        case 'n':
+        {
+            TRACE();
+            resp.reset(new NewUserResponce);
+            resp->deserialize(datas.constData() + 2);
+            if (resp->err == 0) {
+                TRACE();
+                setUser(_toCreate);
+                _toCreate = User();
+                setAccountCreated(true);
+                ConfigManager::instance().saveUser(_user);
+                emit userChanged();
+            } else {
+                setAccountCreated(false);
+            }
+            break;
+        }
+        case 'a':
+        {
+            resp.reset(new AddRequestResponce);
+            resp->deserialize(datas.constData() + 2);
+            break;
+        }
+//        case 'd':
+//        {
+//            resp = new LogOutResponce;
+//        }
         //        case 'p':
         //        {
         //            resp = new UpdateProfileResponce;
         //        }
         //        case 'u':
-        //        {
-        //            resp = new LogInResponce;
-        //        }
-        //        case 'n':
-        //        {
-        //            resp = new LogInResponce;
-        //        }
-        //        case 'a':
         //        {
         //            resp = new LogInResponce;
         //        }
@@ -120,10 +138,22 @@ void SessionManager::editRequest()
 //    emit updateData(requests);
 }
 
-void SessionManager::addRequests()
+void SessionManager::addRequest(const Request & req)
 {
     TRACE();
-//    emit updateData(requests);
+    MessageAddRequest msg;
+
+    msg.setRequestInfo(_user.number.c_str(),
+                       req.location.first,
+                       req.location.second,
+                       req.description.c_str(),
+                       req.title.c_str(),
+                       req.categories.c_str(),
+                       0,
+                       req.date);
+
+
+    socket.write(msg.serialize());
 }
 
 void SessionManager::getByFilter()
@@ -139,15 +169,17 @@ void SessionManager::createAccount(QString phone
                                 , QString email)
 {
     TRACE();
-    _user.lastName = lastName.toStdString();
-    _user.name = name.toStdString();
-    _user.number = phone.toStdString();
-    _user.password = password.toStdString();
-    _user.email = email.toStdString();
+    _toCreate.lastName = lastName.toStdString();
+    _toCreate.name = name.toStdString();
+    _toCreate.number = phone.toStdString();
+    _toCreate.password = password.toStdString();
+    _toCreate.email = email.toStdString();
 
-    ConfigManager::instance().saveUser(_user);
+    MessageNewUser msg;
 
-    emit userChanged();
+    msg.setUserInfo(email, password, name, lastName, phone, "");
+
+    socket.write(msg.serialize());
 }
 
 void SessionManager::signIn(QString phone, QString password)
@@ -164,9 +196,10 @@ void SessionManager::signIn(QString phone, QString password)
     socket.write(msg.serialize());
 }
 
-void SessionManager::setUser(User user)
+void SessionManager::setUser(const User &user)
 {
     TRACE();
+    INFO("name - {}", user.name);
     _user = user;
 
     emit userChanged();
@@ -225,8 +258,17 @@ bool SessionManager::getSignedIn()
 }
 void SessionManager::setSignedIn(bool var)
 {
-    if (var != signedIn) {
-        signedIn = var;
-        emit signedInChanged();
-    }
+    signedIn = var;
+    emit signedInChanged();
+}
+
+bool SessionManager::getAccountCreated()
+{
+    return accountCreated;
+}
+
+void SessionManager::setAccountCreated(bool var)
+{
+    accountCreated = var;
+    emit accountCreatedChanged();
 }

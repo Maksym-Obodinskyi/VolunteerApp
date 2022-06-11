@@ -11,11 +11,9 @@ Rectangle {
     visible: true
     color: "#4242aa"
 
-    function failedtoSignIn() {
-        isPwsdOk.visible = true
-    }
+    property bool failedToSignIn: false
 
-    signal close;
+    signal createAccount;
 
     Text {
         id: title
@@ -63,7 +61,7 @@ Rectangle {
         Text {
             id: isPwsdOk
             text: qsTr("Please try again")
-            visible: false
+            visible: root.failedToSignIn
             anchors {
                 left: parent.left
                 right: parent.right
@@ -89,7 +87,7 @@ Rectangle {
             color: "white"
             MouseArea{
                 anchors.fill: parent
-                onClicked: close()
+                onClicked: root.createAccount()
             }
         }
 

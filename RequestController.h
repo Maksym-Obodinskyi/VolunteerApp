@@ -13,7 +13,11 @@ public:
     std::map<int, std::pair<Request, User>> getRequests();
     void addToFavorites(const Request & request, const User & user);
     void editRequest();
-    void addRequests();
+    void addRequest(double latitude
+                    , double longitude
+                    , std::string title
+                    , std::string description
+                    , int date);
     void getByFilter();
     void getFavoritesList();
     void getLastViewedList();

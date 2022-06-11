@@ -97,13 +97,46 @@ MapQuickItem {
             map.addMapItem(circle)
         }
 
+        function createEmptyMarker(latitude, longitude) {
+            var circle = Qt.createQmlObject('
+import QtQuick 2.0
+import QtLocation 5.15
+
+MapQuickItem {
+    id: root
+    anchorPoint.x: image.width / 2
+    anchorPoint.y: image.height
+    width: image.width
+    height: image.height
+
+    coordinate {
+        latitude: root.latitude
+        longitude: root.longitude
+    }
+
+    property alias latitude: root.coordinate.latitude
+    property alias longitude: root.coordinate.longitude
+
+    sourceItem: Item {
+        Image {
+            id: image
+            source: "qrc:/resources/icons/marker.png"
+        }
+    }
+}', map)
+            circle.latitude = latitude
+            circle.longitude = longitude
+            map.marker = circle
+            map.addMapItem(circle)
+        }
+
         MouseArea {
             anchors.fill: parent
             onDoubleClicked: {
                 if (map.isGetLocation) {
                     map.removeMapItem(map.marker)
-                    map.createMarker(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
                     map.coor = map.toCoordinate(Qt.point(mouse.x,mouse.y))
+                    map.createEmptyMarker(map.coor.latitude, map.coor.longitude)
                 }
             }
 
@@ -508,7 +541,9 @@ MapQuickItem {
             color: "#bb101010"
         }
         contentItem: SignInWindow {
-            onClose: {
+            id: signIn
+            failedToSignIn: false
+            onCreateAccount: {
                 signInPopup.close()
                 createAccPopup.open()
             }
@@ -527,9 +562,8 @@ MapQuickItem {
             color: "#bb101010"
         }
         contentItem: CreateAccWin {
-            onCreated: {
-                createAccPopup.close()
-            }
+            id: createAcc
+            failedToCreate: false
             onBack: {
                 createAccPopup.close()
                 signInPopup.open()
@@ -546,17 +580,28 @@ MapQuickItem {
         {
             map.createMarker(list[it].latitude, list[it].longitude, list[it].title, list[it].description, list[it].date)
         }
-
     }
 
-      Connections {
-          target: SessionManager
-          onSignedInChanged: {
-              if (SessionManager.signedIn) {
-                  signInPopup.close()
-              } else {
-                  signInPopup.open()
-              }
+    Connections {
+      target: SessionManager
+      function onSignedInChanged() {
+          if (SessionManager.signedIn) {
+              signInPopup.close()
+              signIn.failedToSignIn = false
+          } else {
+              signIn.failedToSignIn = true
+              signInPopup.open()
           }
       }
+
+      function onAccountCreatedChanged() {
+          if (SessionManager.accountCreated) {
+              createAccPopup.close()
+              signIn.failedToSignIn = false
+          } else {
+              createAccPopup.open()
+              signIn.failedToSignIn = true
+          }
+      }
+    }
 }

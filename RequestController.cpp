@@ -30,8 +30,13 @@ void RequestController::editRequest()
     TRACE();
 }
 
-void RequestController::addRequests()
+void RequestController::addRequest(double latitude
+                                   , double longitude
+                                   , std::string title
+                                   , std::string description
+                                   , int date)
 {
+    SessionManager::instance().addRequest(Request(std::make_pair(longitude, latitude), title, description, {}, date));
     TRACE();
 }
 

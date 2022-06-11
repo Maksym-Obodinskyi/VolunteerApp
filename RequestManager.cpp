@@ -44,11 +44,15 @@ void RequestManager::editRequest()
     _contr.editRequest();
 }
 
-void RequestManager::addRequest([[maybe_unused]]const Request & request)
+void RequestManager::addRequest(double latitude
+                                , double longitude
+                                , QString title
+                                , QString description
+                                , int date)
 {
     TRACE();
     _contr.cleanData();
-    _contr.addRequests();
+    _contr.addRequest(latitude, longitude, title.toStdString(), description.toStdString(), date);
 }
 
 void RequestManager::getByFilter([[maybe_unused]]const std::set<const std::string &> & categories)

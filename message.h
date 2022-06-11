@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QDateTime>
 #include <QSqlQuery>
+#include "responce.h"
+#include <memory>
 
 struct location
 {
@@ -14,7 +16,7 @@ struct location
 struct RequestInfo
 {
     int id;
-    int userId;
+    QString UserPhone;
     location _location;
     QString description;
     QString title;
@@ -43,7 +45,7 @@ public:
     Message(int msgSize, std::string body);
     virtual void process();
     virtual QByteArray serialize();
-    virtual QString sendToDB(QSqlDatabase &Database);
+    virtual std::unique_ptr<Responce> sendToDB(QSqlDatabase &Database);
     std::string getMessage() {return msg;}
     QStringList splitMessage();
 signals:
@@ -56,11 +58,11 @@ class MessageLogIn : public Message
 {
     Q_OBJECT
 public:
-    explicit MessageLogIn (int size, std::string body);
     MessageLogIn() {}
+    explicit MessageLogIn (int size, std::string body);
     void process() override;
     QByteArray serialize() override;
-    QString sendToDB(QSqlDatabase &Database) override;
+    std::unique_ptr<Responce> sendToDB(QSqlDatabase &Database) override;
     QString getPhoneNumber() {return requestBody.phoneNumber;}
     QString getPassword() {return requestBody.password;}
     void setPhoneNumber(QString log){requestBody.phoneNumber = log;}
@@ -77,10 +79,11 @@ class MessageLogOut : public Message
 {
     Q_OBJECT
 public:
+    MessageLogOut() {}
     explicit MessageLogOut (int size, std::string body);
     void process() override;
     QByteArray serialize() override;
-    QString sendToDB(QSqlDatabase &Database) override;
+    std::unique_ptr<Responce> sendToDB(QSqlDatabase &Database) override;
     void setUserName(QString user_name){userName = user_name;}
     QString getUserName() {return userName;}
 signals:
@@ -92,19 +95,18 @@ class MessageNewUser : public Message
 {
     Q_OBJECT
 public:
+    MessageNewUser() {}
     explicit MessageNewUser (int size, std::string body);
     void process() override;
     QByteArray serialize() override;
-    QString sendToDB(QSqlDatabase &Database) override;
+    std::unique_ptr<Responce> sendToDB(QSqlDatabase &Database) override;
     UserInfo getUserInfo(){return userInfo;}
-    void setUserInfo(int user_id,
-                     QString user_login,
+    void setUserInfo(QString user_email,
                      QString user_password,
                      QString user_name,
                      QString user_lastName,
                      QString user_phoneNumber,
-                     QString user_picture,
-                     double user_rating);
+                     QString user_picture);
 signals:
 private:
     UserInfo userInfo;
@@ -114,19 +116,18 @@ class MessageUpdateProfile : public Message
 {
     Q_OBJECT
 public:
+    MessageUpdateProfile() {}
     explicit MessageUpdateProfile (int size, std::string body);
     void process() override;
     QByteArray serialize() override;
-    QString sendToDB(QSqlDatabase &Database) override;
+    std::unique_ptr<Responce> sendToDB(QSqlDatabase &Database) override;
     UserInfo getUserInfo(){return userInfo;}
-    void setUserInfo(int user_id,
-                     QString user_login,
+    void setUserInfo(QString user_email,
                      QString user_password,
                      QString user_name,
                      QString user_lastName,
                      QString user_phoneNumber,
-                     QString user_picture,
-                     double user_rating);
+                     QString user_picture);
 signals:
 private:
     UserInfo userInfo;
@@ -137,13 +138,13 @@ class MessageAddRequest : public Message
 {
     Q_OBJECT
 public:
+    MessageAddRequest() {}
     explicit MessageAddRequest (int size, std::string body);
     void process() override;
     QByteArray serialize() override;
-    QString sendToDB(QSqlDatabase &Database) override;
+    std::unique_ptr<Responce> sendToDB(QSqlDatabase &Database) override;
     RequestInfo getRequestInfo(){return requestInfo;}
-    void setRequestInfo(int request_id,
-                        int request_userId,
+    void setRequestInfo(QString UserPhone,
                         double request_location_e,
                         double request_location_n,
                         QString request_description,
@@ -160,22 +161,17 @@ class MessageGetRequest : public Message
 {
     Q_OBJECT
 public:
+    MessageGetRequest() {}
     explicit MessageGetRequest (int size, std::string body);
     void process() override;
     QByteArray serialize() override;
-    QString sendToDB(QSqlDatabase &Database) override;
-    RequestInfo getRequestInfo(){return requestInfo;}
-    void setRequestInfo(int request_id,
-                        int request_userId,
-                        location request_location,
-                        std::string request_description,
-                        QString request_title,
-                        QString request_categories,
-                        QDate request_date,
-                        QDate request_targetDate);
+    std::unique_ptr<Responce> sendToDB(QSqlDatabase &Database) override;
+    QString getFilter(){return filter;}
+    void setFilter(QString filt){ filter = filt;}
+
 signals:
 private:
-    RequestInfo requestInfo;
+    QString filter;
 
 };
 
@@ -183,13 +179,14 @@ class MessageUpdateRequest : public Message
 {
     Q_OBJECT
 public:
+    MessageUpdateRequest() {}
     explicit MessageUpdateRequest (int size, std::string body);
     void process() override;
     QByteArray serialize() override;
-    QString sendToDB(QSqlDatabase &Database) override;
+    std::unique_ptr<Responce> sendToDB(QSqlDatabase &Database) override;
     RequestInfo getRequestInfo(){return requestInfo;}
     void setRequestInfo(int request_id,
-                        int request_userId,
+                        QString UserPhone,
                         double request_location_e,
                         double request_location_n,
                         QString request_description,
@@ -207,17 +204,15 @@ class MessageRemoveRequest : public Message
 {
     Q_OBJECT
 public:
+    MessageRemoveRequest() {}
     explicit MessageRemoveRequest (int size, std::string body);
     void process() override;
     QByteArray serialize() override;
-    QString sendToDB(QSqlDatabase &Database) override;
+    std::unique_ptr<Responce> sendToDB(QSqlDatabase &Database) override;
     void setRequestID(int request){requestID = request;}
     int getRequestID() {return requestID;}
 signals:
 private:
-    int requestID=0;
+    int requestID=-1;
 };
 #endif // MESSAGE_H
-
-
-
