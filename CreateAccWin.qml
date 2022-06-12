@@ -64,7 +64,7 @@ Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
             maximumLength: 13
-            placeholderText: qsTr("Phone")
+            placeholderText: qsTr("Phone +380...")
         }
 
         VTextInput {
@@ -110,13 +110,6 @@ Rectangle {
             maximumLength: 35
             echoMode: TextInput.Password
             placeholderText: qsTr("Password")
-            onTextChanged: {
-                if (pswdField.text !== pswdFieldAgain.text) {
-                    isPwsdOk.text = qsTr("Passwords are different")
-                } else {
-                    isPwsdOk.text = ""
-                }
-            }
         }
 
         VTextInput {
@@ -139,16 +132,14 @@ Rectangle {
             }
         }
 
-        Text {
+        VText {
             id: isPwsdOk
-            text: qsTr("Passwords are different")
-            visible: root.failedToCreate
+            text: ""
+            visible: true
             anchors {
-                left: parent.left
-                right: parent.right
+                horizontalCenter: parent.horizontalCenter
                 top: pswdField.bottom
                 topMargin: 20
-                leftMargin: 20
             }
         }
     }
@@ -185,9 +176,23 @@ Rectangle {
             anchors.bottomMargin: 30
 
             onClicked: {
-                if (!isPwsdOk.visible) {
-                    SessionManager.createAccount(phoneField.text, pswdField.text, nameField.text, lastNameField.text, emailField.text)
+                if (!phoneField.text.match(/\+[0-9]{12}/)) {
+                    isPwsdOk.text = qsTr("Phone is incorrect")
+                    return;
+                } else if (pswdField.text !== pswdFieldAgain.text) {
+                    isPwsdOk.text = qsTr("Passwords are different")
+                    return;
+                } else if (!emailField.text.match(/(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/)) {
+                    isPwsdOk.text = qsTr("Email is incorrect")
+                    return;
+                } else if (pswdField.text.length < 8) {
+                    isPwsdOk.text = qsTr("Use at least 8 symbols for password")
+                    return;
+                } else {
+                    isPwsdOk.text = ""
                 }
+
+                SessionManager.createAccount(phoneField.text, pswdField.text, nameField.text, lastNameField.text, emailField.text)
             }
         }
     }

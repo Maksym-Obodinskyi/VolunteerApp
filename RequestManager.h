@@ -15,7 +15,7 @@ public:
     static QObject* singletoneProvider(QQmlEngine * engine, QJSEngine * scriptEngine);
     static RequestManager& instance();
 
-    Q_INVOKABLE QVariantList getRequests();
+    Q_INVOKABLE void getRequests();
     Q_INVOKABLE void addToFavorites(double latitude
                                     , double longitude
                                     , QString title
@@ -26,6 +26,7 @@ public:
                                 , double longitude
                                 , QString title
                                 , QString description
+                                , QString categories
                                 , int date);
     Q_INVOKABLE void getByFilter(const std::set<const std::string &> & categories);
     Q_INVOKABLE void getFavoritesList();

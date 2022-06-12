@@ -11,7 +11,7 @@ Rectangle {
     property string name: ""
     property string lastName: ""
     property string email: ""
-    property string number: ""
+    property string phone: ""
 
     property string title: ""
     property string description: ""

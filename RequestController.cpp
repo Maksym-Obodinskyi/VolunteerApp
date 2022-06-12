@@ -12,10 +12,10 @@ RequestController::RequestController()
 
 }
 
-std::map<int, RequestInfo> RequestController::getRequests()
+void RequestController::getRequests()
 {
     TRACE();
-    return SessionManager::instance().getRequests();
+    SessionManager::instance().getRequests();
 }
 
 void RequestController::addToFavorites(const RequestInfo & request)
@@ -34,15 +34,16 @@ void RequestController::addRequest(double latitude
                                    , double longitude
                                    , QString title
                                    , QString description
+                                   , QString categories
                                    , int date)
 {
     RequestInfo req;
     req.userInfo = SessionManager::instance().getUser();
     req._location.E = latitude;
     req._location.N = longitude;
-    req._location.N = longitude;
     req.title = title;
     req.description = description;
+    req.categories = categories;
     req.date = date;
     SessionManager::instance().addRequest(req);
     TRACE();
@@ -68,7 +69,7 @@ void RequestController::getLastViewedList()
 void RequestController::getUsersRequests()
 {
     TRACE();
-    ConfigManager::instance().getUsersRequests();
+    ConfigManager::instance().getMyRequest();
 }
 
 void RequestController::cleanData()

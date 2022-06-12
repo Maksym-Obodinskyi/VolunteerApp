@@ -4,6 +4,7 @@
 
 #include "SessionManager.h"
 #include "ConfigManager.h"
+#include "RequestManager.h"
 #include "message.h"
 #include "responce.h"
 
@@ -51,9 +52,11 @@ void SessionManager::onReadyRead()
             TRACE();
             resp.reset(new LogInResponce);
             resp->deserialize(datas.constData() + 2);
+            DEBUG("err - {}", resp->err);
             if (resp->err == 0) {
                 setSignedIn(true); //TODO: user not changed pull data from server
                 ConfigManager::instance().saveUser(_user);
+                RequestManager::instance().getRequests();
             } else {
                 setSignedIn(false);
             }
@@ -70,6 +73,7 @@ void SessionManager::onReadyRead()
                 _toCreate = UserInfo();
                 setAccountCreated(true);
                 ConfigManager::instance().saveUser(_user);
+                RequestManager::instance().getRequests();
                 userChanged();
             } else {
                 setAccountCreated(false);
@@ -80,11 +84,19 @@ void SessionManager::onReadyRead()
         {
             resp.reset(new AddRequestResponce);
             resp->deserialize(datas.constData() + 2);
+            RequestManager::instance().getRequests();
+            ConfigManager::instance().addMyRequest(_reqToCreate);
             break;
         }
         case 'g':
         {
-            resp.reset(new GetRequestResponce);
+            GetRequestResponce resp;
+            resp.deserialize(datas.constData() + 2);
+            for(const auto & item : resp.requestsList) {
+                data.append(QVariant::fromValue(item));
+            }
+
+            emit updateRequests();
             break;
         }
 //        case 'd':
@@ -109,10 +121,12 @@ void SessionManager::onReadyRead()
     }
 }
 
-std::map<int, RequestInfo> SessionManager::getRequests()
+void SessionManager::getRequests()
 {
     TRACE();
-    return {};
+    MessageGetRequest msg;
+    msg.setFilter("Food");
+    socket.write(msg.serialize());
 }
 
 void SessionManager::editRequest()
@@ -134,6 +148,8 @@ void SessionManager::addRequest(const RequestInfo & req)
                        req.categories,
                        0,
                        req.date);
+
+    _reqToCreate = req;
 
     socket.write(msg.serialize());
 }
@@ -263,4 +279,9 @@ void SessionManager::setAccountCreated(bool var)
 UserInfo SessionManager::getUser()
 {
     return _user;
+}
+
+QVariantList SessionManager::getData()
+{
+    return data;
 }

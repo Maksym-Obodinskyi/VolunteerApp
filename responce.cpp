@@ -67,8 +67,64 @@ LogInResponce::LogInResponce() : Responce('l')
     TRACE()
 }
 
+QByteArray LogInResponce::serialize()
+{
+    QByteArray ret;
+    ret += type;
+    ret += ':';
+    char arr[5];
+    auto [ptr, ec] = std::to_chars(arr, arr + 5, err);
+    if (ec == std::errc()) {
+        for (auto symbol = arr; symbol != ptr; symbol++) {
+            ret += *symbol;
+        }
+    } else {
+        ret += '9';
+        return ret;
+    }
+    ret += '|';
+
+    ret += addItem(userInfo.id);
+    ret += addItem(userInfo.name);
+    ret += addItem(userInfo.lastName);
+    ret += addItem(userInfo.email);
+    ret += addItem(userInfo.phoneNumber);
+    ret += userInfo.picture + ";";
+
+    std::cout<< "ret: "<< ret.constData() << std::endl;
+    return ret;
+}
+
+void LogInResponce::deserialize(QByteArray arr)
+{
+    std::cout << "deserialize - " << arr.constData() << std::endl;
+    if (arr.size() >= 1) {
+        Responce::deserialize(arr);
+        if (err != 0) {
+            return;
+        }
+        arr.remove(0, arr.indexOf('|')+1);
+        std::cout << "arr - " << arr.toStdString() << std::endl;
+
+        UserInfo userInfo;
+        QList<QByteArray> InfoList =  arr.split(':');
+        if(InfoList.size() == 6)
+        {
+            userInfo.id = InfoList[0].toInt();
+            userInfo.name = InfoList[1];
+            userInfo.lastName = InfoList[2];
+            userInfo.email = InfoList[3];
+            userInfo.phoneNumber = InfoList[4];
+            userInfo.picture = InfoList[5];
+        }
+        err = 0;
+    } else {
+        err = 1001;
+    }
+}
+
 /////////////////////////////////////////////////////////////////////////
-/// \brief LogInResponce::LogOutResponce
+/// \brief LogOutResponce::LogOutResponce
 ///
 /////////////////////////////////////////////////////////////////////////
 
@@ -161,6 +217,10 @@ void GetRequestResponce::deserialize(QByteArray arr)
     TRACE();
     std::cout << "deserialize - " << arr.constData() << std::endl;
     if (arr.size() >= 1) {
+        Responce::deserialize(arr);
+        if (err != 0) {
+            return;
+        }
         arr.remove(0, arr.indexOf('|')+1);
         std::cout << "arr - " << arr.toStdString() << std::endl;
 

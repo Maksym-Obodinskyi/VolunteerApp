@@ -7,7 +7,7 @@
         <file>resources/icons/add.png</file>
         <file>IconButton.qml</file>
         <file>UserPhoto.qml</file>
-        <file>resources/Constants/Style.qml</file>
+        <file>resources/Constants/Styles.qml</file>
         <file>resources/icons/showMore.png</file>
         <file>DelimiterLine.qml</file>
         <file>SettingsPopup.qml</file>
