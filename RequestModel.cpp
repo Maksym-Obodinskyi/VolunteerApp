@@ -13,15 +13,15 @@
 RequestModel::RequestModel(QObject *parent) : QAbstractListModel(parent)
 {
     TRACE();
-    connect(&SessionManager::instance(),    SIGNAL(updateData(std::map<int, std::pair<Request, User>>)),
-            this,                           SLOT(updateData(std::map<int, std::pair<Request, User>>)));
-    connect(&ConfigManager::instance(),     SIGNAL(updateData(std::map<int, std::pair<Request, User>>)),
-            this,                           SLOT(updateData(std::map<int, std::pair<Request, User>>)));
+    connect(&SessionManager::instance(),    SIGNAL(updateData(std::map<int, RequestInfo>)),
+            this,                           SLOT(updateData(std::map<int, RequestInfo>)));
+    connect(&ConfigManager::instance(),     SIGNAL(updateData(std::map<int, RequestInfo>)),
+            this,                           SLOT(updateData(std::map<int, RequestInfo>)));
     connect(&RequestController::instance(), SIGNAL(cleanModel()),
             this,                           SLOT(cleanData()));
 }
 
-void RequestModel::updateData(std::map<int, std::pair<Request, User>> data)
+void RequestModel::updateData(std::map<int, RequestInfo> data)
 {
     TRACE();
     INFO("size - {}", data.size());
@@ -34,7 +34,7 @@ void RequestModel::updateData(std::map<int, std::pair<Request, User>> data)
     _data.reserve(data.size());
     beginInsertRows(QModelIndex(), 0, data.size() - 1);
     for (const auto & [time, item]: data) {
-        _data.push_back(std::make_tuple(time, item.first, item.second));
+        _data.push_back(std::make_pair(time, item));
     }
     endInsertRows();
 }
@@ -65,16 +65,16 @@ QVariant RequestModel::data(const QModelIndex& index, int role) const
 
     INFO("row - {}, ", index.row());
 
-    const auto & [time, req, user] = _data[index.row()];
+    const auto & [time, req] = _data[index.row()];
 
     switch (role) {
-        case Name:          return user.name.c_str();
-        case lastName:      return user.lastName.c_str();
-        case Number:        return user.number.c_str();
-        case Photo:         return user.photo.c_str();
-        case Rating:        return user.rating;
-        case Description:   return req.description.c_str();
-        case Title:         return req.title.c_str();
+//        case Name:          return user.name.c_str();
+//        case lastName:      return user.lastName.c_str();
+//        case Number:        return user.number.c_str();
+//        case Photo:         return user.photo.c_str();
+//        case Rating:        return user.rating;
+        case Description:   return req.description;
+        case Title:         return req.title;
         case Date:          return req.date;
         case Categories:
         case Location:

@@ -3,20 +3,20 @@
 
 #include <QObject>
 
-#include "Request.h"
-#include "User.h"
+#include "RequestInfo.h"
+#include "UserInfo.h"
 
 class RequestController : public QObject
 {
     Q_OBJECT
 public:
-    std::map<int, std::pair<Request, User>> getRequests();
-    void addToFavorites(const Request & request, const User & user);
+    std::map<int, RequestInfo> getRequests();
+    void addToFavorites(const RequestInfo & request);
     void editRequest();
     void addRequest(double latitude
                     , double longitude
-                    , std::string title
-                    , std::string description
+                    , QString title
+                    , QString description
                     , int date);
     void getByFilter();
     void getFavoritesList();

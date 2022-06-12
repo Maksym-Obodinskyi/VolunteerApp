@@ -2,14 +2,15 @@ QT += quick network sql
 
 SOURCES += \
         ConfigManager.cpp \
-        Request.cpp \
         RequestController.cpp \
+        RequestInfo.cpp \
         RequestManager.cpp \
         RequestModel.cpp \
         SessionManager.cpp \
-        User.cpp \
+        UserInfo.cpp \
         main.cpp \
-        message.cpp
+        message.cpp \
+        responce.cpp
 
 RESOURCES += qml.qrc
 
@@ -28,12 +29,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     ConfigManager.h \
     Logger.h \
-    Request.h \
     RequestController.h \
+    RequestInfo.h \
     RequestManager.h \
     RequestModel.h \
     SessionManager.h \
-    User.h \
+    UserInfo.h \
     message.h \
     responce.h
 

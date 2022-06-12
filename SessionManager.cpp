@@ -12,28 +12,6 @@
 #include <QHostAddress>
 using namespace std::chrono_literals;
 
-static Request req {
-      {49.83550884520322, 24.02324415870541}
-    , "Very huilo"
-    , "Putin huilo lalalalalalalal"
-    , "Category 1"
-    , 8
-};
-
-static User user {
-    "Maksym"
-  , "Obodinskyi"
-  , "+380930975704"
-  , "OMG"
-  , 999.999
-  , "m.obodinskyy@nltu.lviv.ua"
-};
-
-static const std::map<int, std::pair<Request, User>> requests
-{
-    {1, {req, user}}
-};
-
 SessionManager::SessionManager() : signedIn(false), accountCreated(false)
 {
     TRACE();
@@ -73,8 +51,12 @@ void SessionManager::onReadyRead()
             TRACE();
             resp.reset(new LogInResponce);
             resp->deserialize(datas.constData() + 2);
-            setSignedIn(resp->err == 0);
-            ConfigManager::instance().saveUser(_user);
+            if (resp->err == 0) {
+                setSignedIn(true); //TODO: user not changed pull data from server
+                ConfigManager::instance().saveUser(_user);
+            } else {
+                setSignedIn(false);
+            }
             break;
         }
         case 'n':
@@ -85,10 +67,10 @@ void SessionManager::onReadyRead()
             if (resp->err == 0) {
                 TRACE();
                 setUser(_toCreate);
-                _toCreate = User();
+                _toCreate = UserInfo();
                 setAccountCreated(true);
                 ConfigManager::instance().saveUser(_user);
-                emit userChanged();
+                userChanged();
             } else {
                 setAccountCreated(false);
             }
@@ -98,6 +80,11 @@ void SessionManager::onReadyRead()
         {
             resp.reset(new AddRequestResponce);
             resp->deserialize(datas.constData() + 2);
+            break;
+        }
+        case 'g':
+        {
+            resp.reset(new GetRequestResponce);
             break;
         }
 //        case 'd':
@@ -116,42 +103,37 @@ void SessionManager::onReadyRead()
         //        {
         //            resp = new LogInResponce;
         //        }
-        //        case 'g':
-        //        {
-        //            resp = new LogInResponce;
-        //        }
         default:
             WARNING("Undefined command received");
             return;
     }
 }
 
-std::map<int, std::pair<Request, User>> SessionManager::getRequests()
+std::map<int, RequestInfo> SessionManager::getRequests()
 {
     TRACE();
-    return requests;
+    return {};
 }
 
 void SessionManager::editRequest()
 {
     TRACE();
-//    emit updateData(requests);
+//     updateData(requests);
 }
 
-void SessionManager::addRequest(const Request & req)
+void SessionManager::addRequest(const RequestInfo & req)
 {
     TRACE();
     MessageAddRequest msg;
 
-    msg.setRequestInfo(_user.number.c_str(),
-                       req.location.first,
-                       req.location.second,
-                       req.description.c_str(),
-                       req.title.c_str(),
-                       req.categories.c_str(),
+    msg.setRequestInfo(req.userInfo.phoneNumber,
+                       req._location.E,
+                       req._location.N,
+                       req.description,
+                       req.title,
+                       req.categories,
                        0,
                        req.date);
-
 
     socket.write(msg.serialize());
 }
@@ -159,7 +141,7 @@ void SessionManager::addRequest(const Request & req)
 void SessionManager::getByFilter()
 {
     TRACE();
-//    emit updateData(requests);
+//     updateData(requests);
 }
 
 void SessionManager::createAccount(QString phone
@@ -169,11 +151,11 @@ void SessionManager::createAccount(QString phone
                                 , QString email)
 {
     TRACE();
-    _toCreate.lastName = lastName.toStdString();
-    _toCreate.name = name.toStdString();
-    _toCreate.number = phone.toStdString();
-    _toCreate.password = password.toStdString();
-    _toCreate.email = email.toStdString();
+    _toCreate.lastName = lastName;
+    _toCreate.name = name;
+    _toCreate.phoneNumber = phone;
+    _toCreate.password = password;
+    _toCreate.email = email;
 
     MessageNewUser msg;
 
@@ -196,37 +178,42 @@ void SessionManager::signIn(QString phone, QString password)
     socket.write(msg.serialize());
 }
 
-void SessionManager::setUser(const User &user)
+void SessionManager::setUser(const UserInfo &user)
 {
     TRACE();
-    INFO("name - {}", user.name);
+    DEBUG("name - {}, lastName - {}, phone - {}, password - {}, email - {}"
+          , user.name.toStdString()
+          , user.lastName.toStdString()
+          , user.phoneNumber.toStdString()
+          , user.password.toStdString()
+          , user.email.toStdString())
     _user = user;
 
-    emit userChanged();
+     emit userChanged();
 }
 
 QString SessionManager::getPhone()
 {
     TRACE();
-    return QString::fromStdString(_user.number);
+    return _user.phoneNumber;
 }
 
 QString SessionManager::getPassword()
 {
     TRACE();
-    return QString::fromStdString(_user.password);
+    return _user.password;
 }
 
 QString SessionManager::getName()
 {
     TRACE();
-    return QString::fromStdString(_user.name);
+    return _user.name;
 }
 
 QString SessionManager::getLastName()
 {
     TRACE();
-    return QString::fromStdString(_user.lastName);
+    return _user.lastName;
 }
 
 void SessionManager::declareInQML()
@@ -259,7 +246,7 @@ bool SessionManager::getSignedIn()
 void SessionManager::setSignedIn(bool var)
 {
     signedIn = var;
-    emit signedInChanged();
+     signedInChanged();
 }
 
 bool SessionManager::getAccountCreated()
@@ -270,5 +257,10 @@ bool SessionManager::getAccountCreated()
 void SessionManager::setAccountCreated(bool var)
 {
     accountCreated = var;
-    emit accountCreatedChanged();
+    accountCreatedChanged();
+}
+
+UserInfo SessionManager::getUser()
+{
+    return _user;
 }

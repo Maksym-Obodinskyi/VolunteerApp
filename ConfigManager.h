@@ -4,8 +4,8 @@
 #include <QObject>
 #include <map>
 
-#include "Request.h"
-#include "User.h"
+#include "RequestInfo.h"
+#include "UserInfo.h"
 
 class ConfigManager : public QObject
 {
@@ -15,13 +15,13 @@ public:
     void getLastViewed();
     void getFavorites();
 
-    void addToFavorites(const Request & request, const User & user);
-    void saveUser(const User & user);
+    void addToFavorites(const RequestInfo & request);
+    void saveUser(const UserInfo & user);
 
     static ConfigManager & instance();
 
 signals:
-    void updateData(std::map<int, std::pair<Request, User>>);
+    void updateData(std::map<int, RequestInfo>);
 
 private:
     ConfigManager();
@@ -35,8 +35,8 @@ private:
     static std::string FAVORITES_FILE;
     static std::string CONFIG_DIR;
     static std::string USER_CONFIG_FILE;
-    std::string                             _userPswd;
-    std::map<int, std::pair<Request, User>> _requests;
+    std::string                _userPswd;
+    std::map<int, RequestInfo> _requests;
 };
 
 #endif // CONFIGMANAGER_H

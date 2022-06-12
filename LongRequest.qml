@@ -103,7 +103,7 @@ Popup {
                 color: "white"
                 font.pixelSize: 18
 
-                text: "This signal is emitted for each line of text that is laid out during the layout process in plain text or styled text mode. It is not emitted in rich text mode. The specified line object provides more details about the line that is currently being laid out. This gives the opportunity to position and resize a line as it is being laid out. It can for example be used to create columns or lay out text around objects. The properties of the specified line object are:"
+                text: "This signal is ted for each line of text that is laid out during the layout process in plain text or styled text mode. It is not ted in rich text mode. The specified line object provides more details about the line that is currently being laid out. This gives the opportunity to position and resize a line as it is being laid out. It can for example be used to create columns or lay out text around objects. The properties of the specified line object are:"
                 wrapMode: Text.WordWrap
             }
 
