@@ -51,6 +51,10 @@ void SessionManager::onReadyRead()
 
     char comm;
 
+    if (datas.startsWith('c')) {
+        INFO("Successfully connected!");
+        return;
+    }
 
     if (datas.size() >= 3) {
         comm = datas[0];

@@ -42,4 +42,5 @@ User& User::operator=(const User & rhs)
     rating = rhs.rating;
     email = rhs.email;
     password = rhs.password;
+    return *this;
 }
