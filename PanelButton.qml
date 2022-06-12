@@ -1,30 +1,32 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.15
 
-Button {
+Rectangle {
     id: root
 
-    property string btnText: ""
-//    readonly property color  genIntColor:          Qt.rgba(0.035, 0.05, 0.066, 1)
-    readonly property string genIntColor:        "#0047b3"
-    readonly property string genIntFocusedColor: "#0047f3"
+    property alias text: text.text
+    property string genIntColor
+    property alias enabled: mouse.enabled
+    signal clicked
 
-    contentItem: Text {
-        text: root.text
-        font: root.font
+    color: mouse.pressed ? "#00796b" : mouse.containsMouse ? "#009688" : genIntColor
+
+    MouseArea {
+        id: mouse
+        anchors.fill: parent
+        hoverEnabled: true
+
+        onClicked: {
+            root.clicked()
+        }
+    }
+
+    Text {
+        id: text
+        anchors.fill: parent
+        font.pixelSize: 18
         color: "white"
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
     }
-
-    anchors {
-        left: parent.left
-        right: parent.right
-        top: parent.top
-    }
-
-    background: null
-    icon.color: focus ? genIntFocusedColor : genIntColor
-    font.pixelSize: 15
-    text: btnText
 }

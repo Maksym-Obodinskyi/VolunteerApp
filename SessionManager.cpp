@@ -47,14 +47,14 @@ void SessionManager::onReadyRead()
     QByteArray datas = socket.readAll();
     DEBUG("datas: {}", datas.toStdString());
 
-    for (auto byte : datas) {
-        INFO("{}", byte);
-    }
-
     std::unique_ptr<Responce> resp;
 
     char comm;
 
+    if (datas.startsWith('c')) {
+        INFO("Successfully connected!");
+        return;
+    }
 
     if (datas.size() >= 3) {
         comm = datas[0];

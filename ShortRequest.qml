@@ -5,7 +5,7 @@ import request_manager 1.0
 Rectangle {
     id: root
 
-    readonly property string genIntColor:   "#4242aa"
+    property alias genIntColor: root.color
 
     property string photo: ""
     property string name: ""
@@ -19,6 +19,8 @@ Rectangle {
     property real longitude: 0
     property int date: 0
     property bool starred: false
+
+    signal openLongReq
 
     width: 400
     height: 250
@@ -38,7 +40,7 @@ Rectangle {
         }
     }
 
-    Text {
+    VText {
         id: titleT
 
         height: contentHeight
@@ -54,7 +56,7 @@ Rectangle {
             rightMargin: 15
         }
 
-        font.pixelSize: 17
+        font.pixelSize: 18
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
     }
@@ -62,9 +64,9 @@ Rectangle {
     Image {
         id: favorite
 
-        source: root.starred ? "qrc:/resources/icons/starFilled.png" : "qrc:/resources/icons/star.png"
-        width: 30
-        height: 30
+        source: root.starred ? "qrc:/resources/icons/yellowStar.png" : "qrc:/resources/icons/whiteStar.png"
+        width: 40
+        height: 40
         anchors {
             top: parent.top
             right: parent.right
@@ -72,6 +74,7 @@ Rectangle {
             topMargin: 10
         }
     }
+
     MouseArea {
         id: favoriteMouse
         anchors.fill: favorite
@@ -82,7 +85,7 @@ Rectangle {
         }
     }
 
-    Text {
+    VText {
         id: descT
 
         text: root.description
@@ -94,7 +97,7 @@ Rectangle {
             leftMargin: 10
         }
 
-        font.pixelSize: 15
+        font.pixelSize: 16
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
     }
@@ -104,7 +107,10 @@ Rectangle {
         anchors.fill: parent
         z: 1
         hoverEnabled: true
-        onEntered: {/*mainWindow.showShortRequestInfo(marker.coordinate);*/ root.visible = true}
+        onEntered: {root.visible = true}
         onExited: {root.visible = false}
+        onClicked: {
+            root.openLongReq()
+        }
     }
 }

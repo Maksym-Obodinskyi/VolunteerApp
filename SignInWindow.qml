@@ -9,8 +9,9 @@ Rectangle {
     id: root
 
     visible: true
-    color: "#4242aa"
+    radius: 30
 
+    property alias genIntColor: root.color
     property bool failedToSignIn: false
 
     signal createAccount;
@@ -20,26 +21,54 @@ Rectangle {
         text: "Sign in"
         height: 40
         width: parent.width
-        anchors.top: parent.top
-        anchors.topMargin: 20
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            topMargin: 20
+        }
+
         horizontalAlignment: Text.AlignHCenter
         font.pointSize: 20
         color: "white"
     }
 
+    DelimiterLine {
+        id: headerDel
+        property int margins: root.radius
+        anchors {
+            top: title.bottom
+            left: parent.left
+            right: parent.right
+            topMargin: 10
+            leftMargin: margins
+            rightMargin: margins
+        }
+    }
+
     Item {
         id: writePhone
-        width: parent.width -40
-        anchors.top: title.bottom
-        anchors.topMargin: 50
+
+        anchors {
+            top: headerDel.bottom
+            left: parent.left
+            right: parent.right
+            topMargin: 40
+            leftMargin: root.radius
+            rightMargin: root.radius
+        }
 
         VTextInput {
             id: phoneField
-            width:  parent.width
+
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+            }
+
             height: 50
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.leftMargin: 20
+
             maximumLength: 13
             placeholderText: qsTr("Enter phone")
         }
@@ -47,12 +76,14 @@ Rectangle {
         VTextInput {
             id: pswdField
 
-            width:  parent.width
             height: 50
-            anchors.top: phoneField.bottom
-            anchors.left: parent.left
-            anchors.topMargin: 20
-            anchors.leftMargin: 20
+
+            anchors {
+                top: phoneField.bottom
+                left: parent.left
+                right: parent.right
+                topMargin: 20
+            }
             maximumLength: 35
             echoMode: TextInput.Password
             placeholderText: qsTr("Enter password")
@@ -73,33 +104,43 @@ Rectangle {
     }
 
     Item {
-        width: parent.width
+        id: controls
         height: 50
-        anchors.bottom: parent.bottom
 
-        Label {
-            id: ill
-            anchors.left: parent.left
-            height: parent.height
-            anchors.leftMargin: 20
-            anchors.bottom: parent.bottom
-            text: qsTr("Create account")
-            color: "white"
-            MouseArea{
-                anchors.fill: parent
-                onClicked: root.createAccount()
-            }
+        property int buttonWidth: 160
+
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            leftMargin: root.radius
+            rightMargin: root.radius
+            bottomMargin: root.radius
         }
 
-        Button {
+
+        VButton {
+            id: ill
+            height: parent.height
+            width: controls.buttonWidth
+            anchors {
+                left: parent.left
+                bottom: parent.bottom
+            }
+
+            text: qsTr("Create account")
+            onClicked: root.createAccount()
+        }
+
+        VButton {
             id: nextButton
             text: qsTr("Sign in")
-            height: 50
-            width: 100
-            anchors.right: parent.right
-            anchors.rightMargin: 20
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 20
+            height: parent.height
+            width: controls.buttonWidth
+            anchors {
+                right: parent.right
+                bottom: parent.bottom
+            }
 
             onClicked: {
                 SessionManager.signIn(phoneField.text, pswdField.text)

@@ -8,7 +8,7 @@ import request_manager 1.0
 Popup {
     id: root
 
-    property string genIntColor:    "#4242aa"
+    property alias genIntColor: rect.color
     property string fontColor:      "white"
 
     height: rect.height
@@ -37,9 +37,8 @@ Popup {
     contentItem: Item {
         Rectangle {
             id: rect
-            color: root.genIntColor
             height: header.height + body.height + 30
-            radius: 10
+            radius: 30
             anchors {
                 left: parent.left
                 right: parent.right
@@ -77,6 +76,8 @@ Popup {
                         top: headerText.bottom
                         left: parent.left
                         right: parent.right
+                        leftMargin: rect.radius
+                        rightMargin: rect.radius
                     }
                 }
             }
@@ -263,7 +264,7 @@ Popup {
 
                     property int horMargin: 30
                     property int buttonsTopMargin: 40
-                    property int buttonsHeight: 30
+                    property int buttonsHeight: 50
                     property int buttonsWidth: 140
 
                     height: Math.max(addRequest.height, cancelRequest.height)

@@ -10,6 +10,6 @@ TextField {
         id: root
 
         color: "white"
-        radius:5
+        radius: 10
     }
 }

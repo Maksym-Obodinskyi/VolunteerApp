@@ -9,6 +9,7 @@ Popup {
 
     visible: false
     modal: true
+    background: null
 
     function open() {
         visible = true
@@ -22,6 +23,7 @@ Popup {
         id: settingsRectangle
         anchors.fill: parent
         color: mainWindow.genIntColor
+        radius: 30
 
         Item {
             id: settingsHeader
@@ -145,6 +147,9 @@ Popup {
                     right: parent.right
                     top: parent.top
                 }
+                enabled: false
+                genIntColor: settingsRectangle.color
+
                 text: qsTr("editProfile")
                 height: settingsFilling.btnHeight
             }
@@ -156,6 +161,9 @@ Popup {
                     right: parent.right
                     top: editProfText.bottom
                 }
+                enabled: false
+                genIntColor: settingsRectangle.color
+
                 text: qsTr("Language")
                 height: settingsFilling.btnHeight
             }
@@ -167,6 +175,9 @@ Popup {
                     right: parent.right
                     top: langText.bottom
                 }
+                enabled: false
+                genIntColor: settingsRectangle.color
+
                 text: qsTr("Notification and Sounds")
                 height: settingsFilling.btnHeight
             }
