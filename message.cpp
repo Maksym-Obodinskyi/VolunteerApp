@@ -59,22 +59,29 @@ void MessageLogIn::process()
 std::unique_ptr<Responce> MessageLogIn::sendToDB(QSqlDatabase &Database){
 
     QSqlQuery query(Database);
-    bool res = query.prepare("SELECT id FROM UserTable WHERE PhoneNumber = ? AND Password = ?");
+    LogInResponce* ptr = new LogInResponce;
+    bool res = query.prepare("SELECT * FROM UserTable WHERE PhoneNumber = ? AND Password = ?");
     DEBUG("{}",res);
     query.bindValue(0, getPhoneNumber());
     query.bindValue(1, getPassword());
 
-    std::unique_ptr<Responce> ptr(new LogInResponce);
     if(query.exec() && query.next()){
         DEBUG("query executed successfuly!");
         QSqlRecord record = query.record();
-        DEBUG("{}", query.value(record.indexOf("id")).toString().toStdString());
+        UserInfo user_info;
+
+        ptr->userInfo.id = query.value(record.indexOf("id")).toInt();
+        ptr->userInfo.name = query.value(record.indexOf("Name")).toString();
+        ptr->userInfo.lastName = query.value(record.indexOf("LastName")).toString();
+        ptr->userInfo.email = query.value(record.indexOf("Email")).toString();
+        ptr->userInfo.phoneNumber = query.value(record.indexOf("PhoneNumber")).toString();
+        ptr->userInfo.picture = query.value(record.indexOf("Picture")).toString();
         ptr->err = 0;
-        return ptr;
+        return std::unique_ptr<Responce>(ptr);
     }else{
         WARNING("{}", query.lastError().text().toStdString());
         ptr->err = 1;
-        return ptr;
+        return std::unique_ptr<Responce>(ptr);
     }
 }
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -221,15 +228,49 @@ void MessageGetRequest::process()
     setFilter(getMessage().c_str());
     std::cout<< getFilter().toStdString()<<std::endl;
 }
-
+int MessageGetRequest::getUserIdForMyRequests(QSqlDatabase &Database)
+{
+    QSqlQuery query(Database);
+    query.prepare("SELECT id FROM UserTable WHERE PhoneNumber = ?");
+    query.bindValue(0, getFilter());
+    if (query.exec() && query.next()){
+        QSqlRecord record = query.record();
+        return query.value(record.indexOf("id")).toInt();
+    } else {
+        WARNING("User with this number is not exist");
+        return 0;
+    }
+}
+bool MessageGetRequest::isFilterUserPhone()
+{
+    return getFilter()[0] == '+';
+}
 std::unique_ptr<Responce> MessageGetRequest::sendToDB(QSqlDatabase &Database){
 
     QSqlQuery query(Database);
-    bool res = query.prepare("SELECT * FROM RequestTable WHERE Category = ?");
+
+    GetRequestResponce* ptr = new GetRequestResponce;
+    bool res ;
+    if(isFilterUserPhone())
+    {
+        int userId = getUserIdForMyRequests(Database);
+        if(!userId)
+        {
+            WARNING("Sorry, some problem with users number, can't find user with this phone");
+            ptr->err = 1;
+            return std::unique_ptr<Responce>(ptr);
+        }
+        DEBUG("userid : {}", userId);
+        res = query.prepare("SELECT * FROM RequestTable WHERE UserId = ?");
+        query.bindValue(0, userId);
+    } else {
+        res = query.prepare("SELECT * FROM RequestTable WHERE Category = ?");
+        DEBUG("filter : {}", getFilter().toStdString());
+        query.bindValue(0, getFilter());
+    }
 
     DEBUG("{}",res);
-    query.bindValue(0, getFilter());
-    GetRequestResponce* ptr = new GetRequestResponce;
+
     if (query.exec()) {
         DEBUG("query executed successfuly!");
         QString respond;
