@@ -11,6 +11,8 @@
 #include <fstream>
 #include <filesystem>
 #include <pwd.h>
+
+#define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
 #include "rapidjson/filewritestream.h"
@@ -103,7 +105,7 @@ ConfigManager::ConfigManager()
 void ConfigManager::readUserConfig()
 {
     TRACE();
-    User _user;
+    UserInfo _user;
 
     std::ifstream ifs(USER_CONFIG_FILE);
     if (!ifs) {
@@ -127,7 +129,6 @@ void ConfigManager::readUserConfig()
      || !json.HasMember("lastname")
      || !json.HasMember("number")
      || !json.HasMember("photo")
-     || !json.HasMember("rating")
      || !json.HasMember("password")
      || !json.HasMember("email"))
     {
@@ -135,13 +136,19 @@ void ConfigManager::readUserConfig()
         return;
     }
 
-    _user.name      = json["name"].GetString();
-    _user.lastName  = json["lastname"].GetString();
-    _user.number    = json["number"].GetString();
-    _user.photo     = json["photo"].GetString();
-    _user.rating    = json["rating"].GetDouble();
-    _user.password  = json["password"].GetString();
-    _user.email     = json["email"].GetString();
+    _user.name        = json["name"].GetString();
+    _user.lastName    = json["lastname"].GetString();
+    _user.phoneNumber = json["number"].GetString();
+    _user.picture     = json["photo"].GetString();
+    _user.password    = json["password"].GetString();
+    _user.email       = json["email"].GetString();
+
+    DEBUG("name - {}, lastName - {}, phone - {}, password - {}, email - {}"
+          , _user.name.toStdString()
+          , _user.lastName.toStdString()
+          , _user.phoneNumber.toStdString()
+          , _user.password.toStdString()
+          , _user.email.toStdString())
 
     SessionManager::instance().setUser(_user);
 }
@@ -156,17 +163,17 @@ void ConfigManager::getUsersRequests()
 {
     TRACE();
 
-//    emit updateData(requests);
+//     updateData(requests);
 }
 
 void ConfigManager::getLastViewed()
 {
     TRACE();
 
-//    emit updateData(lastViewed);
+//     updateData(lastViewed);
 }
 
-void ConfigManager::addToFavorites(const Request & request, const User & user)
+void ConfigManager::addToFavorites(const RequestInfo & request)
 {
     std::fstream fs;
     if (!std::filesystem::exists(FAVORITES_FILE)) {
@@ -207,25 +214,25 @@ void ConfigManager::addToFavorites(const Request & request, const User & user)
     rapidjson::Value requestV;
     requestV.SetObject();
 
-    requestV.AddMember("longitude",     request.location.first,      allocator);
-    requestV.AddMember("latitude",      request.location.second,       allocator);
-    requestV.AddMember("title",         rapidjson::StringRef(request.title.c_str()),          allocator);
-    requestV.AddMember("description",   rapidjson::StringRef(request.description.c_str()),    allocator);
-    requestV.AddMember("categories",    rapidjson::StringRef(request.categories.c_str()), allocator);
-    requestV.AddMember("date",          request.date,           allocator);
+//    requestV.AddMember("longitude",     request.location.first,      allocator);
+//    requestV.AddMember("latitude",      request.location.second,       allocator);
+//    requestV.AddMember("title",         rapidjson::StringRef(request.title.c_str()),          allocator);
+//    requestV.AddMember("description",   rapidjson::StringRef(request.description.c_str()),    allocator);
+//    requestV.AddMember("categories",    rapidjson::StringRef(request.categories.c_str()), allocator);
+//    requestV.AddMember("date",          request.date,           allocator);
 
     v.AddMember("Request", requestV, allocator);
 
     rapidjson::Value userV;
     userV.SetObject();
 
-    userV.AddMember("name",         rapidjson::StringRef(user.name.c_str()),     allocator);
-    userV.AddMember("lastname",     rapidjson::StringRef(user.lastName.c_str()),     allocator);
-    userV.AddMember("number",       rapidjson::StringRef(user.number.c_str()), allocator);
-    userV.AddMember("photo",        rapidjson::StringRef(user.photo.c_str()),    allocator);
-    userV.AddMember("rating",       user.rating,   allocator);
-    userV.AddMember("password",     rapidjson::StringRef(user.photo.c_str()),    allocator);
-    userV.AddMember("email",        rapidjson::StringRef(user.email.c_str()),    allocator);
+//    userV.AddMember("name",         rapidjson::StringRef(user.name.c_str()),     allocator);
+//    userV.AddMember("lastname",     rapidjson::StringRef(user.lastName.c_str()),     allocator);
+//    userV.AddMember("number",       rapidjson::StringRef(user.number.c_str()), allocator);
+//    userV.AddMember("photo",        rapidjson::StringRef(user.photo.c_str()),    allocator);
+//    userV.AddMember("rating",       user.rating,   allocator);
+//    userV.AddMember("password",     rapidjson::StringRef(user.photo.c_str()),    allocator);
+//    userV.AddMember("email",        rapidjson::StringRef(user.email.c_str()),    allocator);
 
     v.AddMember("User", userV, allocator);
     v.AddMember("datetime", std::chrono::duration_cast<std::chrono::seconds>
@@ -304,45 +311,42 @@ void ConfigManager::getFavorites()
         }
 
         int dateTime        = req["datetime"].GetInt();
-        _requests[dateTime] = std::make_pair<Request
-                , User>({{reqField["longitude"].GetDouble(),reqField["latitude"].GetDouble()}
-                                                            , reqField["description"].GetString()
-                                                            , reqField["title"].GetString()
-                                                            , reqField["categories"].GetString()
-                                                            , reqField["date"].GetInt()},
-                                                            { userField["name"].GetString()
-                                                            , userField["lastname"].GetString()
-                                                            , userField["number"].GetString()
-                                                            , userField["photo"].GetString()
-                                                            , userField["rating"].GetDouble()
-                                                            , userField["email"].GetString()
-                                                            , userField["password"].GetString()});
+//        _requests[dateTime] = RequestInfo({{reqField["longitude"].GetDouble(),reqField["latitude"].GetDouble()}
+//                                                            , reqField["description"].GetString()
+//                                                            , reqField["title"].GetString()
+//                                                            , reqField["categories"].GetString()
+//                                                            , reqField["date"].GetInt()},
+//                                                            { userField["name"].GetString()
+//                                                            , userField["lastname"].GetString()
+//                                                            , userField["number"].GetString()
+//                                                            , userField["photo"].GetString()
+//                                                            , userField["rating"].GetDouble()
+//                                                            , userField["email"].GetString()
+//                                                            , userField["password"].GetString()});
     }
 
-    emit updateData(_requests);
+     updateData(_requests);
 }
 
-void ConfigManager::saveUser(const User & user)
+void ConfigManager::saveUser(const UserInfo & user)
 {
     TRACE();
     INFO("name - {}, lastName = {}, number - {}, password - {}, email - {}"
-         , user.name
-         , user.lastName
-         , user.number
-         , user.password
-         , user.email);
+         , user.name.toStdString()
+         , user.lastName.toStdString()
+         , user.phoneNumber.toStdString()
+         , user.password.toStdString()
+         , user.email.toStdString());
     rapidjson::Document json;
     auto & allocator = json.GetAllocator();
-    rapidjson::Value userV;
     json.SetObject();
 
-    json.AddMember("name",         rapidjson::StringRef(user.name.c_str()),     allocator);
-    json.AddMember("lastname",     rapidjson::StringRef(user.lastName.c_str()),     allocator);
-    json.AddMember("number",       rapidjson::StringRef(user.number.c_str()), allocator);
-    json.AddMember("photo",        rapidjson::StringRef(user.photo.c_str()),    allocator);
-    json.AddMember("rating",       user.rating,   allocator);
-    json.AddMember("password",     rapidjson::StringRef(user.password.c_str()),    allocator);
-    json.AddMember("email",        rapidjson::StringRef(user.email.c_str()),    allocator);
+    json.AddMember("name",      user.name.toStdString(),           allocator);
+    json.AddMember("lastname",  user.lastName.toStdString(),       allocator);
+    json.AddMember("number",    user.phoneNumber.toStdString(),    allocator);
+    json.AddMember("photo",     user.picture.toStdString(),        allocator);
+    json.AddMember("password",  user.password.toStdString(),       allocator);
+    json.AddMember("email",     user.email.toStdString(),          allocator);
 
     FILE* fp = fopen(USER_CONFIG_FILE.c_str(), "w");
 

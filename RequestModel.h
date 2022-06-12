@@ -4,8 +4,8 @@
 #include <QAbstractListModel>
 #include <vector>
 
-#include "Request.h"
-#include "User.h"
+#include "RequestInfo.h"
+#include "UserInfo.h"
 
 class RequestModel : public QAbstractListModel
 {
@@ -33,11 +33,11 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
 public slots:
-    void updateData(std::map<int, std::pair<Request, User>> data);
+    void updateData(std::map<int, RequestInfo> data);
     void cleanData();
 
 private:
-    std::vector<std::tuple<int, Request, User>> _data;
+    std::vector<std::pair<int, RequestInfo>> _data;
 };
 
 #endif // REQUESTMODEL_H

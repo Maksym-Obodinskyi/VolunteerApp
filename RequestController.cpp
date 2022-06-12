@@ -12,17 +12,17 @@ RequestController::RequestController()
 
 }
 
-std::map<int, std::pair<Request, User>> RequestController::getRequests()
+std::map<int, RequestInfo> RequestController::getRequests()
 {
     TRACE();
     return SessionManager::instance().getRequests();
 }
 
-void RequestController::addToFavorites(const Request & request, const User & user)
+void RequestController::addToFavorites(const RequestInfo & request)
 {
     TRACE();
 
-    ConfigManager::instance().addToFavorites(request, user);
+    ConfigManager::instance().addToFavorites(request);
 }
 
 void RequestController::editRequest()
@@ -32,11 +32,19 @@ void RequestController::editRequest()
 
 void RequestController::addRequest(double latitude
                                    , double longitude
-                                   , std::string title
-                                   , std::string description
+                                   , QString title
+                                   , QString description
                                    , int date)
 {
-    SessionManager::instance().addRequest(Request(std::make_pair(longitude, latitude), title, description, {}, date));
+    RequestInfo req;
+    req.userInfo = SessionManager::instance().getUser();
+    req._location.E = latitude;
+    req._location.N = longitude;
+    req._location.N = longitude;
+    req.title = title;
+    req.description = description;
+    req.date = date;
+    SessionManager::instance().addRequest(req);
     TRACE();
 }
 
@@ -66,7 +74,7 @@ void RequestController::getUsersRequests()
 void RequestController::cleanData()
 {
     TRACE();
-    emit cleanModel();
+     cleanModel();
 }
 
 RequestController& RequestController::instance()

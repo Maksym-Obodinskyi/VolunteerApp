@@ -7,22 +7,22 @@
 
 #include <condition_variable>
 
-#include "Request.h"
-#include "User.h"
+#include "RequestInfo.h"
+#include "UserInfo.h"
 
 class SessionManager : public QObject
 {
     Q_OBJECT
 public:
-    std::map<int, std::pair<Request, User>> getRequests();
+    std::map<int, RequestInfo> getRequests();
     void editRequest();
-    void addRequest(const Request & req);
+    void addRequest(const RequestInfo & req);
     void getByFilter();
 
     Q_PROPERTY(QString name READ getName NOTIFY userChanged)
     Q_PROPERTY(QString lastName READ getLastName NOTIFY userChanged)
     Q_PROPERTY(QString phone READ getPhone NOTIFY userChanged)
-    Q_PROPERTY(QString password READ getPassword)
+    Q_PROPERTY(QString password READ getPassword NOTIFY userChanged)
 
     Q_PROPERTY(bool signedIn READ getSignedIn NOTIFY signedInChanged)
     Q_PROPERTY(bool accountCreated READ getAccountCreated NOTIFY accountCreatedChanged)
@@ -38,7 +38,7 @@ public:
     static void declareInQML();
     static QObject* singletoneProvider(QQmlEngine * engine, QJSEngine * scriptEngine);
 
-    void setUser(const User &user);
+    void setUser(const UserInfo &user);
 
     QString getPhone();
     QString getPassword();
@@ -49,8 +49,15 @@ public:
     bool getAccountCreated();
     void setAccountCreated(bool);
 
+
+
+
+
+
+    UserInfo getUser();
+
 signals:
-    void updateData(std::map<int, std::pair<Request, User>>);
+    void updateData(std::map<int, RequestInfo>);
     void userChanged();
     void signedInChanged();
     void accountCreatedChanged();
@@ -71,9 +78,9 @@ private:
 
     QTcpSocket socket;
 
-    User _toCreate;
+    UserInfo _toCreate;
 
-    User _user;
+    UserInfo _user;
 };
 
 #endif // SESSIONMANAGER_H

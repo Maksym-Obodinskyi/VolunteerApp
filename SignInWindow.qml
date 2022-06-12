@@ -61,6 +61,8 @@ Rectangle {
         VTextInput {
             id: phoneField
 
+            text: SessionManager.phone
+
             anchors {
                 top: parent.top
                 left: parent.left
@@ -75,6 +77,8 @@ Rectangle {
 
         VTextInput {
             id: pswdField
+
+            text: SessionManager.password
 
             height: 50
 
@@ -148,8 +152,13 @@ Rectangle {
         }
     }
 
-    Component.onCompleted: {
-        pswdField.text = SessionManager.password
-        phoneField.text = SessionManager.phone
+    Connections {
+        target: SessionManager
+        function onUserChanged() {
+            console.log(SessionManager.name)
+            console.log(SessionManager.lastName)
+            console.log(SessionManager.phone)
+            console.log(SessionManager.password)
+        }
     }
 }
