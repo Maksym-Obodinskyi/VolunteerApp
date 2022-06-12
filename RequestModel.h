@@ -16,12 +16,14 @@ public:
         , lastName
         , Number
         , Photo
-        , Rating
-        , Location
+        , Email
+        , Latitude
+        , Longitude
         , Description
         , Title
         , Categories
         , Date
+
     };
 
     explicit RequestModel(QObject *parent = nullptr);

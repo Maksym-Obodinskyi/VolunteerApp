@@ -19,52 +19,10 @@
 #include <rapidjson/writer.h>
 #include <chrono>
 
-//static Request lastViewedReq {
-//      {1.9, 4.2}
-//    , "Some short description-LAST"
-//    , "Very short title-LAST"
-//    , {"Category 1-LAST", "Category 2-LAST"}
-//    , 22
-//};
-
-//static User lastViewedUser {
-//    "Maksym-LAST"
-//  , "Obodinskyi-LAST"
-//  , "+380930975704-LAST"
-//  , "OMG-LAST"
-//  , 45435.454543
-//};
-
-//static Request req {
-//      {1.5, 54.2}
-//    , "Some short description"
-//    , "Very short title"
-//    , {"Category 1", "Category 2"}
-//    , 8
-//};
-
-//static User user {
-//    "Maksym"
-//  , "Obodinskyi"
-//  , "+380930975704"
-//  , "OMG"
-//  , 999.999
-//};
-
-//static const std::map<int, std::pair<Request, User>> requests
-//{
-//    {1, {req, user}}
-//};
-
-
-//static const std::map<int, std::pair<Request, User>> lastViewed
-//{
-//    {1, {lastViewedReq, lastViewedUser}}
-//};
-
 std::string ConfigManager::FAVORITES_FILE;
 std::string ConfigManager::CONFIG_DIR;
 std::string ConfigManager::USER_CONFIG_FILE;
+std::string ConfigManager::MY_REQUESTS;
 
 ConfigManager::ConfigManager()
 {
@@ -91,6 +49,20 @@ ConfigManager::ConfigManager()
 
         if (!file.is_open()) {
             ERROR("Failed to create json file: {}", FAVORITES_FILE);
+        } else {
+            file << "[]";
+            file.close();
+        }
+    }
+
+    MY_REQUESTS = CONFIG_DIR + "/myRequests.json";
+    if (!std::filesystem::exists(MY_REQUESTS)) {
+        std::error_code err;
+        INFO("{} file doesn't exist, creating", MY_REQUESTS);
+        std::ofstream file(MY_REQUESTS);
+
+        if (!file.is_open()) {
+            ERROR("Failed to create json file: {}", MY_REQUESTS);
         } else {
             file << "[]";
             file.close();
@@ -173,159 +145,25 @@ void ConfigManager::getLastViewed()
 //     updateData(lastViewed);
 }
 
-void ConfigManager::addToFavorites(const RequestInfo & request)
+void ConfigManager::addToFavorites(const RequestInfo & req)
 {
-    std::fstream fs;
-    if (!std::filesystem::exists(FAVORITES_FILE)) {
-        fs.open(FAVORITES_FILE, std::ios_base::in | std::ios_base::out);
-        if (!fs) {
-            ERROR("Favorites config not found");
-            return;
-        }
-        fs << "[]";
-        fs.close();
-    }
-
-    fs.open(FAVORITES_FILE, std::ios_base::in | std::ios_base::out);
-    if (!fs) {
-        ERROR("Favorites config not found");
-        return;
-    }
-
-    rapidjson::Document json;
-    rapidjson::IStreamWrapper isw(fs);
-    json.ParseStream(isw);
-    if (json.HasParseError()) {
-        ERROR("Failed to parse favorites config");
-        return;
-    }
-    if (!json.IsArray()) {
-        ERROR("Favorites are not array json");
-        return;
-    }
-
-    rapidjson::Value v;
-    v.SetObject();
-
-    auto & allocator = json.GetAllocator();
-
-    TRACE();
-
-    rapidjson::Value requestV;
-    requestV.SetObject();
-
-//    requestV.AddMember("longitude",     request.location.first,      allocator);
-//    requestV.AddMember("latitude",      request.location.second,       allocator);
-//    requestV.AddMember("title",         rapidjson::StringRef(request.title.c_str()),          allocator);
-//    requestV.AddMember("description",   rapidjson::StringRef(request.description.c_str()),    allocator);
-//    requestV.AddMember("categories",    rapidjson::StringRef(request.categories.c_str()), allocator);
-//    requestV.AddMember("date",          request.date,           allocator);
-
-    v.AddMember("Request", requestV, allocator);
-
-    rapidjson::Value userV;
-    userV.SetObject();
-
-//    userV.AddMember("name",         rapidjson::StringRef(user.name.c_str()),     allocator);
-//    userV.AddMember("lastname",     rapidjson::StringRef(user.lastName.c_str()),     allocator);
-//    userV.AddMember("number",       rapidjson::StringRef(user.number.c_str()), allocator);
-//    userV.AddMember("photo",        rapidjson::StringRef(user.photo.c_str()),    allocator);
-//    userV.AddMember("rating",       user.rating,   allocator);
-//    userV.AddMember("password",     rapidjson::StringRef(user.photo.c_str()),    allocator);
-//    userV.AddMember("email",        rapidjson::StringRef(user.email.c_str()),    allocator);
-
-    v.AddMember("User", userV, allocator);
-    v.AddMember("datetime", std::chrono::duration_cast<std::chrono::seconds>
-                (std::chrono::system_clock::now().time_since_epoch()).count(), allocator);
-
-    json.PushBack(v, allocator);
-
-    FILE* fp = fopen(FAVORITES_FILE.c_str(), "w");
-
-    char writeBuffer[65536];
-    rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
-
-    rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
-    json.Accept(writer);
-    fclose(fp);
+    writeReq(req, FAVORITES_FILE);
 }
 
 void ConfigManager::getFavorites()
 {
     TRACE();
+    getReqs(FAVORITES_FILE);
+}
 
-    std::ifstream ifs(FAVORITES_FILE);
-    if (!ifs) {
-        ERROR("Favorites config not found");
-        return;
-    }
+void ConfigManager::addMyRequest(const RequestInfo & req)
+{
+    writeReq(req, MY_REQUESTS);
+}
 
-    rapidjson::IStreamWrapper   isw(ifs);
-    rapidjson::Document         json;
-    json.ParseStream(isw);
-    if (json.HasParseError()) {
-        ERROR("Failed to parse favorites config");
-        return;
-    }
-    if (!json.IsArray()) {
-        ERROR("Favorites are not array json");
-        return;
-    }
-
-    for (auto it = json.Begin(); it != json.End(); it++) {
-        const auto & req = *it;
-        if (!req.IsObject()) continue;
-        if (!req.HasMember("datetime")
-         || !req.HasMember("Request")
-         || !req.HasMember("User"))
-        {
-            WARNING("Favorites config is not full");
-            continue;
-        }
-        if (!req["Request"].IsObject()
-         || !req["User"].IsObject())
-        {
-            WARNING("Request or User field is not objects");
-            continue;
-        }
-
-        const auto & reqField  = req["Request"];
-        const auto & userField = req["User"];
-
-        if (!reqField.HasMember("longitude")
-         || !reqField.HasMember("latitude")
-         || !reqField.HasMember("title")
-         || !reqField.HasMember("description")
-         || !reqField.HasMember("categories")
-         || !reqField.HasMember("date")
-         || !userField.HasMember("name")
-         || !userField.HasMember("lastname")
-         || !userField.HasMember("number")
-         || !userField.HasMember("photo")
-         || !userField.HasMember("rating")
-                || !userField.HasMember("email")
-                || !userField.HasMember("password"))
-        {
-            WARNING("Request or User field is not full");
-            continue;
-        }
-
-        int dateTime        = req["datetime"].GetInt();
-//        _requests[dateTime] = RequestInfo({{reqField["longitude"].GetDouble(),reqField["latitude"].GetDouble()}
-//                                                            , reqField["description"].GetString()
-//                                                            , reqField["title"].GetString()
-//                                                            , reqField["categories"].GetString()
-//                                                            , reqField["date"].GetInt()},
-//                                                            { userField["name"].GetString()
-//                                                            , userField["lastname"].GetString()
-//                                                            , userField["number"].GetString()
-//                                                            , userField["photo"].GetString()
-//                                                            , userField["rating"].GetDouble()
-//                                                            , userField["email"].GetString()
-//                                                            , userField["password"].GetString()});
-    }
-
-     updateData(_requests);
+void ConfigManager::getMyRequest()
+{
+    getReqs(MY_REQUESTS);
 }
 
 void ConfigManager::saveUser(const UserInfo & user)
@@ -356,4 +194,163 @@ void ConfigManager::saveUser(const UserInfo & user)
     rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
     json.Accept(writer);
     fclose(fp);
+}
+
+void ConfigManager::writeReq(const RequestInfo & req, std::string fileName)
+{
+    INFO("name - {}, lastName = {}, number - {}, password - {}, email - {}, title - {}, description - {}"
+         , req.userInfo.name.toStdString()
+         , req.userInfo.lastName.toStdString()
+         , req.userInfo.phoneNumber.toStdString()
+         , req.userInfo.password.toStdString()
+         , req.userInfo.email.toStdString()
+         , req.title.toStdString()
+         , req.description.toStdString());
+    std::fstream fs;
+    if (!std::filesystem::exists(fileName)) {
+        fs.open(fileName, std::ios_base::in | std::ios_base::out);
+        if (!fs) {
+            ERROR("File not found - {}", fileName);
+            return;
+        }
+        fs << "[]";
+        fs.close();
+    }
+
+    fs.open(fileName, std::ios_base::in | std::ios_base::out);
+    if (!fs) {
+        ERROR("File not found - {}", fileName);
+        return;
+    }
+
+    rapidjson::Document json;
+    rapidjson::IStreamWrapper isw(fs);
+    json.ParseStream(isw);
+    if (json.HasParseError()) {
+        ERROR("Failed to parse config - {}", fileName);
+        return;
+    }
+    if (!json.IsArray()) {
+        ERROR("File {} are not array json", fileName);
+        return;
+    }
+
+    rapidjson::Value v;
+    v.SetObject();
+
+    auto & allocator = json.GetAllocator();
+
+    TRACE();
+
+    rapidjson::Value requestV;
+    requestV.SetObject();
+
+    requestV.AddMember("longitude",     req._location.E,      allocator);
+    requestV.AddMember("latitude",      req._location.N,       allocator);
+    requestV.AddMember("title",         req.title.toStdString(),          allocator);
+    requestV.AddMember("description",   req.description.toStdString(),    allocator);
+    requestV.AddMember("categories",    req.categories.toStdString(), allocator);
+    requestV.AddMember("date",          req.date,           allocator);
+
+    v.AddMember("Request", requestV, allocator);
+
+    rapidjson::Value userV;
+    userV.SetObject();
+
+    userV.AddMember("name",         req.userInfo.name.toStdString(),     allocator);
+    userV.AddMember("lastname",     req.userInfo.lastName.toStdString(),     allocator);
+    userV.AddMember("number",       req.userInfo.phoneNumber.toStdString(), allocator);
+    userV.AddMember("photo",        req.userInfo.picture.toStdString(),    allocator);
+    userV.AddMember("password",     req.userInfo.password.toStdString(),    allocator);
+    userV.AddMember("email",        req.userInfo.email.toStdString(),    allocator);
+
+    v.AddMember("User", userV, allocator);
+
+    json.PushBack(v, allocator);
+
+    FILE* fp = fopen(fileName.c_str(), "w");
+
+    char writeBuffer[65536];
+    rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+
+    rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+    json.Accept(writer);
+    fclose(fp);
+}
+
+void ConfigManager::getReqs(std::string fileName)
+{
+    std::map<int, RequestInfo> reqs;
+    std::ifstream ifs(fileName);
+    if (!ifs) {
+        ERROR("Config not found - {}", fileName);
+        return;
+    }
+
+    rapidjson::IStreamWrapper   isw(ifs);
+    rapidjson::Document         json;
+    json.ParseStream(isw);
+    if (json.HasParseError()) {
+        ERROR("Failed to parse config - {}", fileName);
+        return;
+    }
+    if (!json.IsArray()) {
+        ERROR("Config are not array json - {}", fileName);
+        return;
+    }
+
+    for (auto it = json.Begin(); it != json.End(); it++) {
+        const auto & req = *it;
+        if (!req.IsObject()) continue;
+        if (!req.HasMember("Request")
+         || !req.HasMember("User"))
+        {
+            WARNING("Config is not full - {}", fileName);
+            continue;
+        }
+        if (!req["Request"].IsObject()
+         || !req["User"].IsObject())
+        {
+            WARNING("Request or User field is not objects");
+            continue;
+        }
+
+        const auto & reqField  = req["Request"];
+        const auto & userField = req["User"];
+
+        if (!reqField.HasMember("longitude")
+         || !reqField.HasMember("latitude")
+         || !reqField.HasMember("title")
+         || !reqField.HasMember("description")
+         || !reqField.HasMember("categories")
+         || !reqField.HasMember("date")
+         || !userField.HasMember("name")
+         || !userField.HasMember("lastname")
+         || !userField.HasMember("number")
+         || !userField.HasMember("photo")
+                || !userField.HasMember("email")
+                || !userField.HasMember("password"))
+        {
+            WARNING("Request or User field is not full");
+            continue;
+        }
+
+        RequestInfo info;
+        info._location.E            = reqField["latitude"].GetDouble();
+        info._location.N            = reqField["longitude"].GetDouble();
+        info.description            = reqField["description"].GetString();
+        info.title                  = reqField["title"].GetString();
+        info.categories             = reqField["categories"].GetString();
+        info.date                   = reqField["date"].GetInt();
+        info.userInfo.name          = userField["name"].GetString();
+        info.userInfo.lastName      = userField["lastname"].GetString();
+        info.userInfo.phoneNumber   = userField["number"].GetString();
+        info.userInfo.picture       = userField["photo"].GetString();
+        info.userInfo.email         = userField["email"].GetString();
+        info.userInfo.password      = userField["password"].GetString();
+        info.userInfo.name          = userField["name"].GetString();
+        reqs[info.date] = info;
+    }
+
+     updateData(reqs);
 }

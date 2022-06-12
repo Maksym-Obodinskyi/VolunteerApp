@@ -68,16 +68,17 @@ QVariant RequestModel::data(const QModelIndex& index, int role) const
     const auto & [time, req] = _data[index.row()];
 
     switch (role) {
-//        case Name:          return user.name.c_str();
-//        case lastName:      return user.lastName.c_str();
-//        case Number:        return user.number.c_str();
-//        case Photo:         return user.photo.c_str();
-//        case Rating:        return user.rating;
+        case Name:          return req.userInfo.name;
+        case lastName:      return req.userInfo.lastName;
+        case Number:        return req.userInfo.phoneNumber;
+        case Photo:         return req.userInfo.picture;
+        case Email:         return req.userInfo.email;
         case Description:   return req.description;
         case Title:         return req.title;
         case Date:          return req.date;
-        case Categories:
-        case Location:
+        case Categories:    return req.categories;
+        case Latitude:      return req._location.E;
+        case Longitude:     return req._location.N;
         default:
             WARNING("Unexpectedly received default");
             return QVariant();
@@ -93,8 +94,9 @@ QHash<int, QByteArray> RequestModel::roleNames() const
         , {Roles::lastName,     "lastName"}
         , {Roles::Number,       "number"}
         , {Roles::Photo,        "photo"}
-        , {Roles::Rating,       "rating"}
-        , {Roles::Location,     "location"}
+        , {Roles::Email,        "email"}
+        , {Roles::Latitude,     "latitude"}
+        , {Roles::Longitude,    "longitude"}
         , {Roles::Description,  "description"}
         , {Roles::Title,        "title"}
         , {Roles::Categories,   "categories"}

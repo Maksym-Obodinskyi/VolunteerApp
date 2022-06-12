@@ -14,7 +14,7 @@ class SessionManager : public QObject
 {
     Q_OBJECT
 public:
-    std::map<int, RequestInfo> getRequests();
+    void getRequests();
     void editRequest();
     void addRequest(const RequestInfo & req);
     void getByFilter();
@@ -26,6 +26,8 @@ public:
 
     Q_PROPERTY(bool signedIn READ getSignedIn NOTIFY signedInChanged)
     Q_PROPERTY(bool accountCreated READ getAccountCreated NOTIFY accountCreatedChanged)
+
+    Q_PROPERTY(QVariantList data READ getData CONSTANT)
 
     Q_INVOKABLE void createAccount(QString phone
                                    , QString password
@@ -51,9 +53,7 @@ public:
 
 
 
-
-
-
+    QVariantList getData();
     UserInfo getUser();
 
 signals:
@@ -61,6 +61,7 @@ signals:
     void userChanged();
     void signedInChanged();
     void accountCreatedChanged();
+    void updateRequests();
 
 private slots:
     void onReadyRead();
@@ -76,9 +77,12 @@ private:
     bool accountCreated;
     int errorCode{-1};
 
+    QVariantList data;
+
     QTcpSocket socket;
 
     UserInfo _toCreate;
+    RequestInfo _reqToCreate;
 
     UserInfo _user;
 };

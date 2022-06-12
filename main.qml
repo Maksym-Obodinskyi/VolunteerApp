@@ -27,6 +27,9 @@ ApplicationWindow {
     readonly property string userName:      SessionManager.name
     readonly property string userLastName:  SessionManager.lastName
     readonly property string userNumber:    SessionManager.phone
+    readonly property string pressedColor:  "#00796b"
+    readonly property string hoveredColor:  "#009688"
+    readonly property string defColor:      mainWindow.genIntColor
     readonly property string fontColor:     "white"
 
     Map {
@@ -41,7 +44,7 @@ ApplicationWindow {
         property var marker: null
         property var coor: null
 
-        function createMarker(latitude, longitude, title, description, date) {
+        function createMarker(latitude, longitude, title, description, date, name, lastName, email, phone) {
             var circle = Qt.createQmlObject('
 import QtQuick 2.0
 import QtLocation 5.15
@@ -63,6 +66,10 @@ MapQuickItem {
     property alias latitude: reqWin.latitude
     property alias longitude: reqWin.longitude
     property alias date: reqWin.date
+    property alias name: reqWin.name
+    property alias lastName: reqWin.lastName
+    property alias email: reqWin.email
+    property alias phone: reqWin.phone
 
     sourceItem: Item {
         Image {
@@ -88,7 +95,7 @@ MapQuickItem {
                 horizontalCenter: image.horizontalCenter
             }
             onOpenLongReq: {
-                longReq.open()
+                longReq.open(title, description, name, lastName, email, phone)
             }
         }
     }
@@ -98,6 +105,10 @@ MapQuickItem {
             circle.title = title
             circle.description = description
             circle.date = date
+            circle.name = name
+            circle.lastName = lastName
+            circle.email = email
+            circle.phone = phone
             map.marker = circle
             map.addMapItem(circle)
         }
@@ -131,6 +142,7 @@ MapQuickItem {
 }', map)
             circle.latitude = latitude
             circle.longitude = longitude
+            map.coor = circle.coordinate
             map.marker = circle
             map.addMapItem(circle)
         }
@@ -145,29 +157,84 @@ MapQuickItem {
                 }
             }
 
-            VButton {
-                id: sendLocationBtn
+            Item {
+                id: chooseLocationControls
 
-                visible: map.isGetLocation
+                width: 620
+                height: 60
 
-                width: 300
-                height: 50
+                property int btnWidth: width / 2 - 20
+                property int btnHeight: height
 
-                text: map.marker === null ? qsTr("Double click to choose location") : qsTr("Choose this location")
+                anchors {
+                    bottom: parent.bottom
+                    bottomMargin: 20
+                    horizontalCenter: parent.horizontalCenter
+                }
 
-                anchors.bottomMargin: 20
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
+                VButton {
+                    id: sendLocationBtn
 
-                onClicked: {
-                    if (map.marker !== null) {
-                        addRequestPopup.addRequest(map.coor.latitude, map.coor.longitude)
-                        addRequestPopup.clear()
-                        map.isGetLocation = false;
-                        map.removeMapItem(map.marker)
+                    visible: map.isGetLocation
+
+                    width: chooseLocationControls.btnWidth
+                    height: chooseLocationControls.btnHeight
+
+                    text: map.marker === null ? qsTr("Double click to choose location") : qsTr("Choose this location")
+
+                    textColor: "white"
+                    font.pixelSize: 20
+                    pressedColor: mainWindow.pressedColor
+                    hoveredColor: mainWindow.hoveredColor
+                    defColor: mainWindow.defColor
+
+                    anchors {
+                        bottom: parent.bottom
+                        right: parent.right
+                    }
+
+                    onClicked: {
+                        if (map.marker !== null) {
+                            addRequestPopup.addRequest(map.coor.latitude, map.coor.longitude)
+                            addRequestPopup.clear()
+                            map.isGetLocation = false;
+                            map.clearMapItems()
+                        }
+                    }
+
+                    onVisibleChanged: {
+                        if (visible) {
+                            map.marker = null
+                            map.coor = null
+                            map.clearMapItems();
+                        }
+                    }
+                }
+
+                VButton {
+                    id: cancelLocationBtn
+                    width: chooseLocationControls.btnWidth
+                    visible: map.isGetLocation
+                    height: chooseLocationControls.btnHeight
+                    text: qsTr("Cancel")
+                    textColor: "white"
+                    font.pixelSize: 20
+                    pressedColor: mainWindow.pressedColor
+                    hoveredColor: mainWindow.hoveredColor
+                    defColor: mainWindow.defColor
+                    anchors {
+                        left: parent.left
+                        bottom: parent.bottom
+                    }
+
+                    onClicked: {
+                        map.clearMapItems()
+                        map.isGetLocation = false
+                        RequestManager.getRequests()
                     }
                 }
             }
+
         }
     }
 
@@ -178,12 +245,18 @@ MapQuickItem {
 
         genIntColor: mainWindow.genIntColor
 
-        function open() {
-            visible = true
+        function open(title, description, name, lastName, email, phone) {
+            longReq.title = title
+            longReq.description = description
+            longReq.name = name
+            longReq.lastName = lastName
+            longReq.email = email
+            longReq.phone = phone
+            longReq.visible = true
         }
 
         function close() {
-            visible = false
+            longReq.visible = false
         }
 
         anchors.centerIn: parent
@@ -539,6 +612,16 @@ MapQuickItem {
                         id: reqMenuItem
                         anchors.fill: parent
                         hoverEnabled: true
+                        onClicked: {
+                            console.log("open")
+                            longReq.open(  model.title
+                                         , model.description
+                                         , model.name
+                                         , model.lastName
+                                         , model.email
+                                         , model.number)
+                            menu.close()
+                        }
                     }
 
 //                    DelimiterLine {
@@ -627,33 +710,43 @@ MapQuickItem {
         signInPopup.open()
 
         map.clearMapItems()
-        var list = RequestManager.getRequests();
-        for(var it = 0; it < list.length; it++)
-        {
-            map.createMarker(list[it].latitude, list[it].longitude, list[it].title, list[it].description, list[it].date)
-        }
     }
 
     Connections {
-      target: SessionManager
-      function onSignedInChanged() {
-          if (SessionManager.signedIn) {
-              signInPopup.close()
-              signIn.failedToSignIn = false
-          } else {
-              signIn.failedToSignIn = true
-              signInPopup.open()
-          }
-      }
+        target: SessionManager
+        function onSignedInChanged() {
+            if (SessionManager.signedIn) {
+                signInPopup.close()
+                signIn.failedToSignIn = false
+            } else {
+                signIn.failedToSignIn = true
+                signInPopup.open()
+            }
+        }
 
-      function onAccountCreatedChanged() {
-          if (SessionManager.accountCreated) {
-              createAccPopup.close()
-              signIn.failedToSignIn = false
-          } else {
-              createAccPopup.open()
-              signIn.failedToSignIn = true
-          }
-      }
+        function onAccountCreatedChanged() {
+            if (SessionManager.accountCreated) {
+                createAccPopup.close()
+                signIn.failedToSignIn = false
+            } else {
+                createAccPopup.open()
+                signIn.failedToSignIn = true
+            }
+        }
+
+        function onUpdateRequests() {
+            var list = SessionManager.data
+            for (var it = 0; it < list.length; it++) {
+                map.createMarker(list[it].latitude
+                                 , list[it].longitude
+                                 , list[it].title
+                                 , list[it].description
+                                 , list[it].date
+                                 , list[it].name
+                                 , list[it].lastName
+                                 , list[it].email
+                                 , list[it].phone)
+            }
+        }
     }
 }

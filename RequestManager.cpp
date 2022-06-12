@@ -12,17 +12,10 @@ RequestManager::RequestManager(RequestController & contr) : _contr(contr)
     TRACE();
 }
 
-QVariantList RequestManager::getRequests()
+void RequestManager::getRequests()
 {
     TRACE();
-    QVariantList list;
-    _contr.cleanData();
-    auto reqs = _contr.getRequests();
-
-    for (const auto & [_, reqUser] : reqs) {
-//        list << QVariant::fromValue(reqUser);
-    }
-    return list;
+    _contr.getRequests();
 }
 
 void RequestManager::addToFavorites(double longitude
@@ -48,11 +41,12 @@ void RequestManager::addRequest(double latitude
                                 , double longitude
                                 , QString title
                                 , QString description
+                                , QString categories
                                 , int date)
 {
     TRACE();
     _contr.cleanData();
-    _contr.addRequest(latitude, longitude, title, description, date);
+    _contr.addRequest(latitude, longitude, title, description, categories, date);
 }
 
 void RequestManager::getByFilter([[maybe_unused]]const std::set<const std::string &> & categories)

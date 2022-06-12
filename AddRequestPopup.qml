@@ -1,6 +1,7 @@
-import QtQuick 2.0
-import QtQuick.Controls 1.4
+import QtQuick 2.12
+import QtQuick.Controls 1.4 as QC14
 import QtQuick.Controls 2.15
+import QtQuick.Controls.Styles 1.4
 
 import "resources/Constants"
 import request_manager 1.0
@@ -22,6 +23,7 @@ Popup {
         RequestManager.addRequest(latitude, longitude
                                       , titleTextInput.text
                                       , descInput.text
+                                      , categoriesComboBox.currentText
                                       , calendar.data);
     }
 
@@ -140,6 +142,7 @@ Popup {
                         placeholderText: qsTr("Walk animals")
                         font.pixelSize: body.fontPixelSize
                         height: 35
+                        maximumLength: 40
                         anchors {
                             top: titleText.bottom
                             left: parent.left
@@ -152,8 +155,8 @@ Popup {
                 Item {
                     id: descriptionItem
 
-                    height: descText.height + descInput.height
-                          + descText.anchors.topMargin + descInput.anchors.topMargin
+                    height: descText.height + descView.height
+                          + descText.anchors.topMargin + descView.anchors.topMargin
 
                     anchors {
                         top: titleItem.bottom
@@ -182,12 +185,11 @@ Popup {
                         }
                     }
 
-                    TextArea {
-                        id: descInput
+                    ScrollView {
+                        id: descView
 
-                        placeholderText: qsTr("Description...")
-                        font.pixelSize: body.fontPixelSize
-                        height: 100
+                        height: 150
+
                         anchors {
                             top: descText.bottom
                             left: parent.left
@@ -197,7 +199,18 @@ Popup {
 
                         background: Rectangle {
                             color: "white"
-                            radius:5
+                            radius: 10
+                        }
+
+
+                        TextArea {
+                            id: descInput
+
+                            wrapMode: TextEdit.Wrap
+
+                            placeholderText: qsTr("Description...\n                                                                                                                               \n                                                                                                                               \n                                                                                                                               \n                                                                                                                               \n                                                                                                                               ")
+                            font.pixelSize: body.fontPixelSize
+                            anchors.fill: parent
                         }
                     }
                 }
@@ -237,18 +250,92 @@ Popup {
 
                     ComboBox {
                         id: categoriesComboBox
-                        width: 200
                         model: [ "Food", "Millitary", "Money", "Clothes", "Delivery", "Home" ]
+
                         anchors {
                             top: categoriesText.bottom
                             left: parent.left
                             right: parent.right
                             topMargin: body.controlVerMargin
                         }
+
+                        delegate: ItemDelegate {
+                            width: categoriesComboBox.width
+                            contentItem: Text {
+                                text: modelData
+                                color: "black"
+                                font: categoriesComboBox.font
+                                verticalAlignment: Text.AlignVCenter
+                                horizontalAlignment: Text.AlignLeft
+                            }
+                            highlighted: categoriesComboBox.highlightedIndex === index
+//                            radius: 10
+                        }
+
+                        indicator: Canvas {
+                            id: canvas
+                            x: categoriesComboBox.width - width - categoriesComboBox.rightPadding
+                            y: categoriesComboBox.topPadding + (categoriesComboBox.availableHeight - height) / 2
+                            width: 12
+                            height: 8
+                            contextType: "2d"
+
+                            Connections {
+                                target: categoriesComboBox
+                                function onPressedChanged() { canvas.requestPaint(); }
+                            }
+
+                            onPaint: {
+                                context.reset();
+                                context.moveTo(0, 0);
+                                context.lineTo(width, 0);
+                                context.lineTo(width / 2, height);
+                                context.closePath();
+                                context.fillStyle = categoriesComboBox.pressed ? "#00796b" : root.genIntColor;
+                                context.fill();
+                            }
+                        }
+
+                        contentItem: Text {
+                            leftPadding: 10
+                            z: categoriesComboBox.indicator.width + categoriesComboBox.spacing
+
+                            text: categoriesComboBox.displayText
+                            font: categoriesComboBox.font
+                            color: "black"
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignLeft
+                        }
+
+                        background: Rectangle {
+                            implicitWidth: 120
+                            implicitHeight: 40
+                            radius: 3
+                        }
+
+                        popup: Popup {
+                            y: categoriesComboBox.height - 5
+                            width: categoriesComboBox.width
+                            implicitHeight: contentItem.implicitHeight + 3
+                            padding: 0
+
+                            contentItem: ListView {
+                                clip: true
+                                implicitHeight: contentHeight
+                                model: categoriesComboBox.popup.visible ? categoriesComboBox.delegateModel : null
+                                currentIndex: categoriesComboBox.highlightedIndex
+
+                                ScrollIndicator.vertical: ScrollIndicator { }
+                            }
+
+                            background: Rectangle {
+                                radius: 3
+                            }
+                        }
                     }
                 }
 
-                Calendar {
+                QC14.Calendar {
                     id: calendar
 
                     width: 350
@@ -259,11 +346,22 @@ Popup {
                     }
                 }
 
+                VText {
+                    id: errorTxt
+                    anchors {
+                        horizontalCenter: calendar.horizontalCenter
+                        top: calendar.bottom
+                        topMargin: 8
+                    }
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+
                 Item {
                     id: controls
 
                     property int horMargin: 30
-                    property int buttonsTopMargin: 40
+                    property int buttonsTopMargin: 60
                     property int buttonsHeight: 50
                     property int buttonsWidth: 140
 
@@ -289,6 +387,14 @@ Popup {
                             topMargin: controls.buttonsTopMargin
                         }
                         onClicked: {
+                            if (descInput.length > 150) {
+                                errorTxt.text = "Too long description\nMaximum length 150"
+                                return;
+                            } else if (titleTextInput.length > 40){
+                                errorTxt.text = "Too long title\nMaximum length 40"
+                                return;
+                            }
+
                             root.getLocation()
                             root.close()
                         }

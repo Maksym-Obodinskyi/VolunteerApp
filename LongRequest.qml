@@ -52,7 +52,7 @@ Popup {
 
                 height: contentHeight
 
-                text: "Walk animals"
+                text: root.title
 
                 anchors {
                     top: parent.top
@@ -103,7 +103,7 @@ Popup {
                 color: "white"
                 font.pixelSize: 18
 
-                text: "This signal is ted for each line of text that is laid out during the layout process in plain text or styled text mode. It is not ted in rich text mode. The specified line object provides more details about the line that is currently being laid out. This gives the opportunity to position and resize a line as it is being laid out. It can for example be used to create columns or lay out text around objects. The properties of the specified line object are:"
+                text: root.description
                 wrapMode: Text.WordWrap
             }
 
@@ -139,7 +139,7 @@ Popup {
                 VText {
                     id: name
 
-                    text: "Maksym"
+                    text: root.name
 
                     anchors {
                         top: parent.top
@@ -151,7 +151,7 @@ Popup {
                 VText {
                     id: lastName
 
-                    text: "Obodinskyi"
+                    text: root.lastName
 
                     anchors {
                         top: parent.top
@@ -163,7 +163,7 @@ Popup {
                 VText {
                     id: phone
 
-                    text: "+380930975704"
+                    text: root.phone
 
                     anchors {
                         top: name.bottom
@@ -175,7 +175,7 @@ Popup {
                 VText {
                     id: email
 
-                    text: "m.obodinskyy@nltu.lviv.ua"
+                    text: root.email
 
                     anchors {
                         top: phone.bottom

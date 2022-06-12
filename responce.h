@@ -24,6 +24,9 @@ struct Responce {
 
 struct LogInResponce : Responce {
     LogInResponce();
+    QByteArray serialize() override;
+    void deserialize(QByteArray arr) override;
+    UserInfo userInfo;
 };
 
 struct LogOutResponce : Responce {

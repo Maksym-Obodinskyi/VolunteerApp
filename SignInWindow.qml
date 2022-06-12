@@ -93,16 +93,14 @@ Rectangle {
             placeholderText: qsTr("Enter password")
         }
 
-        Text {
+        VText {
             id: isPwsdOk
             text: qsTr("Please try again")
             visible: root.failedToSignIn
             anchors {
-                left: parent.left
-                right: parent.right
+                horizontalCenter: parent.horizontalCenter
                 top: pswdField.bottom
                 topMargin: 20
-                leftMargin: 20
             }
         }
     }

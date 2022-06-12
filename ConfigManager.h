@@ -14,8 +14,10 @@ public:
     void getUsersRequests();
     void getLastViewed();
     void getFavorites();
+    void getMyRequest();
 
     void addToFavorites(const RequestInfo & request);
+    void addMyRequest(const RequestInfo & request);
     void saveUser(const UserInfo & user);
 
     static ConfigManager & instance();
@@ -30,13 +32,16 @@ private:
     ConfigManager& operator=(const ConfigManager &) = delete;
     ConfigManager& operator=(const ConfigManager &&) = delete;
 
+    void writeReq(const RequestInfo & req, std::string fileName);
+    void getReqs(std::string fileName);
+
     void readUserConfig();
 
     static std::string FAVORITES_FILE;
     static std::string CONFIG_DIR;
     static std::string USER_CONFIG_FILE;
+    static std::string MY_REQUESTS;
     std::string                _userPswd;
-    std::map<int, RequestInfo> _requests;
 };
 
 #endif // CONFIGMANAGER_H
