@@ -651,6 +651,11 @@ MapQuickItem {
         width: 400
         height: 600
         anchors.centerIn: parent
+        onEditAcc: {
+            createAcc.edit = true
+            createAccPopup.open()
+            settingsWindow.close()
+        }
     }
 
     AddRequestPopup {
@@ -690,11 +695,12 @@ MapQuickItem {
         modal: true
         closePolicy: Popup.CloseOnPressOutside
         background: null
-        width: 600
-        height: 460
         Overlay.modal: Rectangle {
             color: "#bb101010"
         }
+
+        width: 600
+        height: createAcc.edit ? 520 : 460
         contentItem: CreateAccWin {
             id: createAcc
             failedToCreate: false

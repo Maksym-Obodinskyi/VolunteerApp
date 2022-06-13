@@ -25,5 +25,6 @@
         <file>VText.qml</file>
         <file>resources/icons/whiteStar.png</file>
         <file>resources/icons/yellowStar.png</file>
+        <file>resources/icons/userPhoto.png</file>
     </qresource>
 </RCC>

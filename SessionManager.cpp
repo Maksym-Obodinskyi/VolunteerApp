@@ -26,8 +26,6 @@ void SessionManager::onReadyRead()
     QByteArray datas = socket.readAll();
     DEBUG("datas: {}", datas.toStdString());
 
-    std::unique_ptr<Responce> resp;
-
     char comm;
 
     if (datas.startsWith('c')) {
@@ -50,12 +48,13 @@ void SessionManager::onReadyRead()
         case 'l':
         {
             TRACE();
-            resp.reset(new LogInResponce);
-            resp->deserialize(datas.constData() + 2);
-            DEBUG("err - {}", resp->err);
-            if (resp->err == 0) {
+            LogInResponce resp;
+            resp.deserialize(datas.constData() + 2);
+            DEBUG("err - {}", resp.err);
+            if (!resp.err) {
                 setSignedIn(true); //TODO: user not changed pull data from server
-                ConfigManager::instance().saveUser(_user);
+                ConfigManager::instance().saveUser(resp.userInfo);
+                setUser(resp.userInfo);
                 RequestManager::instance().getRequests();
             } else {
                 setSignedIn(false);
@@ -65,12 +64,12 @@ void SessionManager::onReadyRead()
         case 'n':
         {
             TRACE();
-            resp.reset(new NewUserResponce);
-            resp->deserialize(datas.constData() + 2);
-            if (resp->err == 0) {
+            NewUserResponce resp;
+            resp.deserialize(datas.constData() + 2);
+            if (!resp.err) {
                 TRACE();
-                setUser(_toCreate);
-                _toCreate = UserInfo();
+                setUser(_tmp);
+                _tmp = UserInfo();
                 setAccountCreated(true);
                 ConfigManager::instance().saveUser(_user);
                 RequestManager::instance().getRequests();
@@ -82,8 +81,8 @@ void SessionManager::onReadyRead()
         }
         case 'a':
         {
-            resp.reset(new AddRequestResponce);
-            resp->deserialize(datas.constData() + 2);
+            AddRequestResponce resp;
+            resp.deserialize(datas.constData() + 2);
             RequestManager::instance().getRequests();
             ConfigManager::instance().addMyRequest(_reqToCreate);
             break;
@@ -99,14 +98,20 @@ void SessionManager::onReadyRead()
             emit updateRequests();
             break;
         }
+        case 'p':
+        {
+            UpdateProfileResponce resp;
+            resp.deserialize(datas.constData() + 2);
+
+            if (!resp.err) {
+                _user = _tmp;
+            }
+            break;
+        }
 //        case 'd':
 //        {
 //            resp = new LogOutResponce;
 //        }
-        //        case 'p':
-        //        {
-        //            resp = new UpdateProfileResponce;
-        //        }
         //        case 'u':
         //        {
         //            resp = new LogInResponce;
@@ -167,15 +172,15 @@ void SessionManager::createAccount(QString phone
                                 , QString email)
 {
     TRACE();
-    _toCreate.lastName = lastName;
-    _toCreate.name = name;
-    _toCreate.phoneNumber = phone;
-    _toCreate.password = password;
-    _toCreate.email = email;
+    _tmp.lastName = lastName;
+    _tmp.name = name;
+    _tmp.phoneNumber = phone;
+    _tmp.password = password;
+    _tmp.email = email;
 
     MessageNewUser msg;
 
-    msg.setUserInfo(email, password, name, lastName, phone, "");
+    msg.setUserInfo(email, password, name, lastName, phone);
 
     socket.write(msg.serialize());
 }
@@ -284,4 +289,33 @@ UserInfo SessionManager::getUser()
 QVariantList SessionManager::getData()
 {
     return data;
+}
+
+QString SessionManager::getEmail()
+{
+    return _user.email;
+}
+
+void SessionManager::editAccount(QString phone
+                                 , QString password
+                                 , QString name
+                                 , QString lastName
+                                 , QString email
+                                 , QString picturePath)
+{
+    DEBUG("pic path - {}", picturePath.toStdString());
+    if (!picturePath.isEmpty()) {
+        picturePath.remove(0, 7);
+        QImage pict(picturePath);
+        _tmp.picture = pict.scaled(90, 90);
+    }
+    _tmp.email = email;
+    _tmp.password = password;
+    _tmp.name = name;
+    _tmp.lastName = lastName;
+    _tmp.phoneNumber = phone;
+
+    MessageUpdateProfile msg;
+    msg.setUserInfo(email, password, name, lastName, phone, _tmp.picture);
+    socket.write(msg.serialize());
 }
