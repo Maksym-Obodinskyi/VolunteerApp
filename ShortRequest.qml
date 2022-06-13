@@ -81,7 +81,16 @@ Rectangle {
         z: 1000
         onClicked: {
             root.starred = !root.starred
-            RequestManager.addToFavorites(root.longitude, root.latitude, root.title, root.description, root.date)
+            RequestManager.addToFavorites(root.name
+                                          , root.lastName
+                                          , root.email
+                                          , root.phone
+                                          , root.photo
+                                          , root.latitude
+                                          , root.longitude
+                                          , root.title
+                                          , root.description
+                                          , root.date)
         }
     }
 

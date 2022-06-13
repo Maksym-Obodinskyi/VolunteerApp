@@ -16,7 +16,12 @@ public:
     static RequestManager& instance();
 
     Q_INVOKABLE void getRequests();
-    Q_INVOKABLE void addToFavorites(double latitude
+    Q_INVOKABLE void addToFavorites(QString name
+                                    , QString lastName
+                                    , QString email
+                                    , QString phone
+                                    , QImage photo
+                                    , double latitude
                                     , double longitude
                                     , QString title
                                     , QString description

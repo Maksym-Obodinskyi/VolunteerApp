@@ -17,12 +17,7 @@ struct RequestInfo : public QObject
 {
     Q_GADGET
 public:
-//    RequestInfo(std::pair<double, double> _location
-//          , const std::string & _description
-//          , const std::string & _title
-//          , const std::string & _categories
-//          , int _date);
-    RequestInfo() : QObject(nullptr) {}
+    RequestInfo();
     RequestInfo(const RequestInfo & req);
     RequestInfo(RequestInfo && req);
     RequestInfo& operator=(const RequestInfo & req);

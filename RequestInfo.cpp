@@ -1,25 +1,16 @@
 #define LOG_CATEGORY "RequestInfo"
-#define LOG_LEVEL _TRACE_
+#define LOG_LEVEL _INFO_
 #include "Logger.h"
 #include "RequestInfo.h"
 
 #include <QQmlEngine>
 
-//RequestInfo::RequestInfo(std::pair<double, double> _location
-//                 , const std::string & _description
-//                 , const std::string & _title
-//                 , const std::string & _categories
-//                 , int _date) :
-//                   QObject(nullptr)
-//                 , location(_location)
-//                 , description(_description)
-//                 , title(_title)
-//                 , categories(_categories)
-//                 , date(_date)
-//{
-//}
+RequestInfo::RequestInfo() : QObject(nullptr)
+{
 
-RequestInfo::RequestInfo(const RequestInfo & req)
+}
+
+RequestInfo::RequestInfo(const RequestInfo & req) : QObject(nullptr)
 {
     TRACE();
     id = req.id;
@@ -48,7 +39,7 @@ RequestInfo& RequestInfo::operator=(const RequestInfo & req)
     return *this;
 }
 
-RequestInfo::RequestInfo(RequestInfo && req)
+RequestInfo::RequestInfo(RequestInfo && req) : QObject(nullptr)
 {
     TRACE();
     id = req.id;

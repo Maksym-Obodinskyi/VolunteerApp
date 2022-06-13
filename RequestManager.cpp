@@ -18,16 +18,30 @@ void RequestManager::getRequests()
     _contr.getRequests();
 }
 
-void RequestManager::addToFavorites(double longitude
+void RequestManager::addToFavorites(QString name
+                                    , QString lastName
+                                    , QString email
+                                    , QString phone
+                                    , QImage photo
                                     , double latitude
+                                    , double longitude
                                     , QString title
                                     , QString description
                                     , int date)
 {
     TRACE();
-    _contr.cleanData();
-    ///////////////////////////
-    _contr.addToFavorites(RequestInfo());
+    RequestInfo req;
+    req.userInfo.name = name;
+    req.userInfo.lastName = lastName;
+    req.userInfo.email = email;
+    req.userInfo.phoneNumber = phone;
+    req.userInfo.picture = photo;
+    req._location.E = latitude;
+    req._location.N = longitude;
+    req.title = title;
+    req.description = description;
+    req.date = date;
+    _contr.addToFavorites(req);
 }
 
 void RequestManager::editRequest()

@@ -368,6 +368,8 @@ MapQuickItem {
                     UserPhoto {
                         id: userMenuPhoto
 
+                        uri: SessionManager.photo
+
                         anchors {
                             top: parent.top
                             left: parent.left
@@ -685,6 +687,7 @@ MapQuickItem {
             onCreateAccount: {
                 signInPopup.close()
                 createAccPopup.open()
+                createAcc.edit = false
             }
         }
     }
@@ -708,6 +711,10 @@ MapQuickItem {
             onBack: {
                 createAccPopup.close()
                 signInPopup.open()
+            }
+
+            onClose: {
+                createAccPopup.close()
             }
         }
     }

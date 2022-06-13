@@ -15,10 +15,11 @@ Rectangle {
 
     property alias genIntColor: root.color
     property bool failedToCreate: false
-    property bool edit: true
+    property bool edit: false
 
     signal created;
     signal back;
+    signal close;
 
     Text {
         id: title
@@ -209,13 +210,13 @@ Rectangle {
             anchors.left: parent.left
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 30
-            text: edit ? qsTr("Cancel") : qsTr("Back")
-            onClicked: back()
+            text: root.edit ? qsTr("Cancel") : qsTr("Back")
+            onClicked: root.edit ? root.close() : back()
         }
 
         VButton {
             id: nextButton
-            text: edit ? qsTr("Edit") : qsTr("Create")
+            text: root.edit ? qsTr("Edit") : qsTr("Create")
             height: 50
             width: 200
             anchors.right: parent.right
@@ -269,9 +270,8 @@ Rectangle {
                     edit()
                 } else {
                     create()
+                    root.close()
                 }
-
-
             }
         }
     }

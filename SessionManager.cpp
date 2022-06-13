@@ -52,7 +52,8 @@ void SessionManager::onReadyRead()
             resp.deserialize(datas.constData() + 2);
             DEBUG("err - {}", resp.err);
             if (!resp.err) {
-                setSignedIn(true); //TODO: user not changed pull data from server
+                setSignedIn(true);
+                resp.userInfo.password = password;
                 ConfigManager::instance().saveUser(resp.userInfo);
                 setUser(resp.userInfo);
                 RequestManager::instance().getRequests();
@@ -73,7 +74,6 @@ void SessionManager::onReadyRead()
                 setAccountCreated(true);
                 ConfigManager::instance().saveUser(_user);
                 RequestManager::instance().getRequests();
-                userChanged();
             } else {
                 setAccountCreated(false);
             }
@@ -92,6 +92,7 @@ void SessionManager::onReadyRead()
             GetRequestResponce resp;
             resp.deserialize(datas.constData() + 2);
             for(const auto & item : resp.requestsList) {
+                item.userInfo.picture.save(QString::fromStdString(ConfigManager::CONFIG_DIR) + '/' + item.userInfo.phoneNumber);
                 data.append(QVariant::fromValue(item));
             }
 
@@ -195,6 +196,7 @@ void SessionManager::signIn(QString phone, QString password)
 
     msg.setPassword(password);
     msg.setPhoneNumber(phone);
+    this->password = password;
 
     socket.write(msg.serialize());
 }
@@ -267,7 +269,7 @@ bool SessionManager::getSignedIn()
 void SessionManager::setSignedIn(bool var)
 {
     signedIn = var;
-     signedInChanged();
+    emit signedInChanged();
 }
 
 bool SessionManager::getAccountCreated()
@@ -278,7 +280,7 @@ bool SessionManager::getAccountCreated()
 void SessionManager::setAccountCreated(bool var)
 {
     accountCreated = var;
-    accountCreatedChanged();
+    emit accountCreatedChanged();
 }
 
 UserInfo SessionManager::getUser()
@@ -294,6 +296,11 @@ QVariantList SessionManager::getData()
 QString SessionManager::getEmail()
 {
     return _user.email;
+}
+
+QString SessionManager::getPhoto()
+{
+    return QString("file://" + QString::fromStdString(ConfigManager::CONFIG_DIR) + '/' + _user.phoneNumber) ;
 }
 
 void SessionManager::editAccount(QString phone

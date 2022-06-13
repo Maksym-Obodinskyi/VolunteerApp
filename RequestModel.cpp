@@ -71,7 +71,7 @@ QVariant RequestModel::data(const QModelIndex& index, int role) const
         case Name:          return req.userInfo.name;
         case lastName:      return req.userInfo.lastName;
         case Number:        return req.userInfo.phoneNumber;
-        case Photo:         return req.userInfo.picture;
+        case Photo:         return QString("file://") + QString::fromStdString(ConfigManager::CONFIG_DIR) + '/' + req.userInfo.phoneNumber;
         case Email:         return req.userInfo.email;
         case Description:   return req.description;
         case Title:         return req.title;

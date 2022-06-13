@@ -26,5 +26,6 @@
         <file>resources/icons/whiteStar.png</file>
         <file>resources/icons/yellowStar.png</file>
         <file>resources/icons/userPhoto.png</file>
+        <file>resources/icons/defaultUser.png</file>
     </qresource>
 </RCC>
