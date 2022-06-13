@@ -250,7 +250,7 @@ Popup {
 
                     ComboBox {
                         id: categoriesComboBox
-                        model: [ "Food", "Millitary", "Money", "Clothes", "Delivery", "Home" ]
+                        model: [ "Food", "Millitary", "Money", "Clothes", "Delivery", "Home", "Animals", "Car", "Devices", "Other" ]
 
                         anchors {
                             top: categoriesText.bottom
@@ -321,7 +321,7 @@ Popup {
 
                             contentItem: ListView {
                                 clip: true
-                                implicitHeight: contentHeight
+                                implicitHeight: 285
                                 model: categoriesComboBox.popup.visible ? categoriesComboBox.delegateModel : null
                                 currentIndex: categoriesComboBox.highlightedIndex
 

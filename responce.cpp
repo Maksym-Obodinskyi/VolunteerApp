@@ -2,6 +2,7 @@
 #define LOG_LEVEL _TRACE_
 #include "Logger.h"
 #include "responce.h"
+#include "message.h"
 
 #include <QStringList>
 #include <QRegExp>
@@ -15,6 +16,11 @@ Responce::Responce(char _type) : type(_type)
 QByteArray Responce::addItem(QString itemsField)
 {
     return itemsField.toUtf8() + ":";
+}
+
+QByteArray Responce::addItem(double itemsField)
+{
+    return QString::number(itemsField).toUtf8() + ":";
 }
 
 QByteArray Responce::addItem(int itemsField)
@@ -41,7 +47,6 @@ QByteArray Responce::serialize()
 
 void Responce::deserialize(QByteArray arr)
 {
-    std::cout << "deserialize - " << arr.constData() << std::endl;
     if (arr.size() >= 1) {
         int result;
         const auto[_, ec] = std::from_chars(arr.constData(), arr.constData() + arr.size(), result);
@@ -69,6 +74,7 @@ LogInResponce::LogInResponce() : Responce('l')
 
 QByteArray LogInResponce::serialize()
 {
+    TRACE();
     QByteArray ret;
     ret += type;
     ret += ':';
@@ -89,7 +95,7 @@ QByteArray LogInResponce::serialize()
     ret += addItem(userInfo.lastName);
     ret += addItem(userInfo.email);
     ret += addItem(userInfo.phoneNumber);
-    ret += userInfo.picture + ";";
+    ret += Message::serializePicture(userInfo.picture) + ";";
 
     std::cout<< "ret: "<< ret.constData() << std::endl;
     return ret;
@@ -97,16 +103,13 @@ QByteArray LogInResponce::serialize()
 
 void LogInResponce::deserialize(QByteArray arr)
 {
-    std::cout << "deserialize - " << arr.constData() << std::endl;
     if (arr.size() >= 1) {
         Responce::deserialize(arr);
         if (err != 0) {
             return;
         }
         arr.remove(0, arr.indexOf('|')+1);
-        std::cout << "arr - " << arr.toStdString() << std::endl;
 
-        UserInfo userInfo;
         QList<QByteArray> InfoList =  arr.split(':');
         if(InfoList.size() == 6)
         {
@@ -115,7 +118,7 @@ void LogInResponce::deserialize(QByteArray arr)
             userInfo.lastName = InfoList[2];
             userInfo.email = InfoList[3];
             userInfo.phoneNumber = InfoList[4];
-            userInfo.picture = InfoList[5];
+            userInfo.picture = Message::deserializePicture(InfoList[5]);
         }
         err = 0;
     } else {
@@ -191,7 +194,7 @@ QByteArray GetRequestResponce::serialize()
         return ret;
     }
     ret += '|';
-    for( const auto &item : requestsList)
+    for(auto &item : requestsList)
     {
         ret += addItem(item.id);
         ret += addItem(item.title);
@@ -206,7 +209,8 @@ QByteArray GetRequestResponce::serialize()
         ret += addItem(item.userInfo.email);
         ret += addItem(item.userInfo.phoneNumber);
 
-        ret += item.userInfo.picture + ";";
+        ret += Message::serializePicture(item.userInfo.picture);
+        ret += ";";
     }
     std::cout<< "ret: "<< ret.constData() << std::endl;
     return ret;
@@ -215,19 +219,15 @@ QByteArray GetRequestResponce::serialize()
 void GetRequestResponce::deserialize(QByteArray arr)
 {
     TRACE();
-    std::cout << "deserialize - " << arr.constData() << std::endl;
     if (arr.size() >= 1) {
         Responce::deserialize(arr);
         if (err != 0) {
             return;
         }
         arr.remove(0, arr.indexOf('|')+1);
-        std::cout << "arr - " << arr.toStdString() << std::endl;
-
         QList<QByteArray> reqList =  arr.split(';');
         for(auto req : reqList) {
             RequestInfo reqInfo;
-            std::cout << "req - " << req.toStdString() << std::endl;
             QList<QByteArray> InfoList =  req.split(':');
             if(InfoList.size() > 1)
             {
@@ -243,7 +243,7 @@ void GetRequestResponce::deserialize(QByteArray arr)
                 reqInfo.userInfo.lastName = InfoList[9];
                 reqInfo.userInfo.email = InfoList[10];
                 reqInfo.userInfo.phoneNumber = InfoList[11];
-                reqInfo.userInfo.picture = InfoList[12];
+                reqInfo.userInfo.picture = Message::deserializePicture(InfoList[12]);
 
                 requestsList.append(reqInfo);
             }

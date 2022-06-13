@@ -11,6 +11,8 @@ Popup {
     modal: true
     background: null
 
+    signal editAcc
+
     function open() {
         visible = true
     }
@@ -147,11 +149,15 @@ Popup {
                     right: parent.right
                     top: parent.top
                 }
-                enabled: false
+//                enabled: false
                 genIntColor: settingsRectangle.color
 
                 text: qsTr("editProfile")
                 height: settingsFilling.btnHeight
+
+                onClicked: {
+                    editAcc();
+                }
             }
 
             PanelButton {

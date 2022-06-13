@@ -20,6 +20,9 @@ public:
     virtual std::unique_ptr<Responce> sendToDB(QSqlDatabase &Database);
     std::string getMessage() {return msg;}
     QStringList splitMessage();
+    QImage getPicture(QString picName);
+    static QByteArray serializePicture(QImage & image);
+    static QImage deserializePicture(QString image);
 signals:
 private:
     std::string msg;
@@ -77,8 +80,7 @@ public:
                      QString user_password,
                      QString user_name,
                      QString user_lastName,
-                     QString user_phoneNumber,
-                     QString user_picture);
+                     QString user_phoneNumber);
 signals:
 private:
     UserInfo userInfo;
@@ -99,7 +101,7 @@ public:
                      QString user_name,
                      QString user_lastName,
                      QString user_phoneNumber,
-                     QString user_picture);
+                     QImage  user_picture);
 signals:
 private:
     UserInfo userInfo;

@@ -1,25 +1,17 @@
 #define LOG_CATEGORY "RequestInfo"
-#define LOG_LEVEL _TRACE_
+#define LOG_LEVEL _INFO_
 #include "Logger.h"
 #include "RequestInfo.h"
-
+#include <chrono>
 #include <QQmlEngine>
 
-//RequestInfo::RequestInfo(std::pair<double, double> _location
-//                 , const std::string & _description
-//                 , const std::string & _title
-//                 , const std::string & _categories
-//                 , int _date) :
-//                   QObject(nullptr)
-//                 , location(_location)
-//                 , description(_description)
-//                 , title(_title)
-//                 , categories(_categories)
-//                 , date(_date)
-//{
-//}
+RequestInfo::RequestInfo() : QObject(nullptr)
+  , date(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count())
+{
 
-RequestInfo::RequestInfo(const RequestInfo & req)
+}
+
+RequestInfo::RequestInfo(const RequestInfo & req) : QObject(nullptr)
 {
     TRACE();
     id = req.id;
@@ -28,7 +20,6 @@ RequestInfo::RequestInfo(const RequestInfo & req)
     description = req.description;
     title = req.title;
     categories = req.categories;
-    date = req.date;
     targetDate = req.targetDate;
     userInfo = req.userInfo;
 }
@@ -42,13 +33,12 @@ RequestInfo& RequestInfo::operator=(const RequestInfo & req)
     description = req.description;
     title = req.title;
     categories = req.categories;
-    date = req.date;
     targetDate = req.targetDate;
     userInfo = req.userInfo;
     return *this;
 }
 
-RequestInfo::RequestInfo(RequestInfo && req)
+RequestInfo::RequestInfo(RequestInfo && req) : QObject(nullptr)
 {
     TRACE();
     id = req.id;
@@ -57,7 +47,6 @@ RequestInfo::RequestInfo(RequestInfo && req)
     description = std::move(req.description);
     title = std::move(req.title);
     categories = std::move(req.categories);
-    date = req.date;
     targetDate = req.targetDate;
     userInfo = std::move(req.userInfo);
 }
@@ -71,7 +60,6 @@ RequestInfo& RequestInfo::operator=(RequestInfo && req)
     description = std::move(req.description);
     title = std::move(req.title);
     categories = std::move(req.categories);
-    date = req.date;
     targetDate = req.targetDate;
     userInfo = std::move(req.userInfo);
     return *this;
@@ -113,7 +101,7 @@ QString RequestInfo::getPhone()
     return userInfo.phoneNumber;
 }
 
-QString RequestInfo::getPicture()
+QImage RequestInfo::getPicture()
 {
     return userInfo.picture;
 }
@@ -193,7 +181,7 @@ void RequestInfo::setPhone(QString var)
 
 }
 
-void RequestInfo::setPicture(QString var)
+void RequestInfo::setPicture(QImage var)
 {
     userInfo.picture = var;
 
@@ -226,12 +214,6 @@ void RequestInfo::setTitle(QString var)
 void RequestInfo::setCategories(QString var)
 {
     categories = var;
-
-}
-
-void RequestInfo::setDate(int var)
-{
-    date = var;
 
 }
 

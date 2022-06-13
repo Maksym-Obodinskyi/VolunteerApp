@@ -23,6 +23,8 @@ public:
     Q_PROPERTY(QString lastName READ getLastName NOTIFY userChanged)
     Q_PROPERTY(QString phone READ getPhone NOTIFY userChanged)
     Q_PROPERTY(QString password READ getPassword NOTIFY userChanged)
+    Q_PROPERTY(QString email READ getEmail NOTIFY userChanged)
+    Q_PROPERTY(QString photo READ getPhoto NOTIFY userChanged)
 
     Q_PROPERTY(bool signedIn READ getSignedIn NOTIFY signedInChanged)
     Q_PROPERTY(bool accountCreated READ getAccountCreated NOTIFY accountCreatedChanged)
@@ -34,6 +36,12 @@ public:
                                    , QString name
                                    , QString lastName
                                    , QString email);
+    Q_INVOKABLE void editAccount(QString phone
+                                 , QString password
+                                 , QString name
+                                 , QString lastName
+                                 , QString email
+                                 , QString picturePath);
     Q_INVOKABLE void signIn(QString phone, QString password);
 
     static SessionManager & instance();
@@ -46,6 +54,8 @@ public:
     QString getPassword();
     QString getName();
     QString getLastName();
+    QString getEmail();
+    QString getPhoto();
     bool getSignedIn();
     void setSignedIn(bool);
     bool getAccountCreated();
@@ -81,8 +91,9 @@ private:
 
     QTcpSocket socket;
 
-    UserInfo _toCreate;
+    UserInfo _tmp;
     RequestInfo _reqToCreate;
+    QString password;
 
     UserInfo _user;
 };

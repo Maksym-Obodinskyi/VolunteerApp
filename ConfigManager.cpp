@@ -100,7 +100,6 @@ void ConfigManager::readUserConfig()
     if (!json.HasMember("name")
      || !json.HasMember("lastname")
      || !json.HasMember("number")
-     || !json.HasMember("photo")
      || !json.HasMember("password")
      || !json.HasMember("email"))
     {
@@ -111,7 +110,6 @@ void ConfigManager::readUserConfig()
     _user.name        = json["name"].GetString();
     _user.lastName    = json["lastname"].GetString();
     _user.phoneNumber = json["number"].GetString();
-    _user.picture     = json["photo"].GetString();
     _user.password    = json["password"].GetString();
     _user.email       = json["email"].GetString();
 
@@ -121,6 +119,8 @@ void ConfigManager::readUserConfig()
           , _user.phoneNumber.toStdString()
           , _user.password.toStdString()
           , _user.email.toStdString())
+
+    _user.picture.load(QString::fromStdString(CONFIG_DIR) + '/' + _user.phoneNumber);
 
     SessionManager::instance().setUser(_user);
 }
@@ -179,10 +179,13 @@ void ConfigManager::saveUser(const UserInfo & user)
     auto & allocator = json.GetAllocator();
     json.SetObject();
 
+    QString picFile = QString::fromStdString(CONFIG_DIR) + '/' + user.phoneNumber;
+
+    user.picture.save(picFile);
+
     json.AddMember("name",      user.name.toStdString(),           allocator);
     json.AddMember("lastname",  user.lastName.toStdString(),       allocator);
     json.AddMember("number",    user.phoneNumber.toStdString(),    allocator);
-    json.AddMember("photo",     user.picture.toStdString(),        allocator);
     json.AddMember("password",  user.password.toStdString(),       allocator);
     json.AddMember("email",     user.email.toStdString(),          allocator);
 
@@ -257,10 +260,13 @@ void ConfigManager::writeReq(const RequestInfo & req, std::string fileName)
     rapidjson::Value userV;
     userV.SetObject();
 
+    QString picFile = QString::fromStdString(CONFIG_DIR) + '/' + req.userInfo.phoneNumber;
+
+    req.userInfo.picture.save(picFile);
+
     userV.AddMember("name",         req.userInfo.name.toStdString(),     allocator);
     userV.AddMember("lastname",     req.userInfo.lastName.toStdString(),     allocator);
     userV.AddMember("number",       req.userInfo.phoneNumber.toStdString(), allocator);
-    userV.AddMember("photo",        req.userInfo.picture.toStdString(),    allocator);
     userV.AddMember("password",     req.userInfo.password.toStdString(),    allocator);
     userV.AddMember("email",        req.userInfo.email.toStdString(),    allocator);
 
@@ -280,6 +286,7 @@ void ConfigManager::writeReq(const RequestInfo & req, std::string fileName)
 
 void ConfigManager::getReqs(std::string fileName)
 {
+    TRACE();
     std::map<int, RequestInfo> reqs;
     std::ifstream ifs(fileName);
     if (!ifs) {
@@ -327,9 +334,8 @@ void ConfigManager::getReqs(std::string fileName)
          || !userField.HasMember("name")
          || !userField.HasMember("lastname")
          || !userField.HasMember("number")
-         || !userField.HasMember("photo")
-                || !userField.HasMember("email")
-                || !userField.HasMember("password"))
+         || !userField.HasMember("email")
+         || !userField.HasMember("password"))
         {
             WARNING("Request or User field is not full");
             continue;
@@ -341,16 +347,16 @@ void ConfigManager::getReqs(std::string fileName)
         info.description            = reqField["description"].GetString();
         info.title                  = reqField["title"].GetString();
         info.categories             = reqField["categories"].GetString();
-        info.date                   = reqField["date"].GetInt();
+        info.date                   = reqField["date"].GetInt64();
         info.userInfo.name          = userField["name"].GetString();
         info.userInfo.lastName      = userField["lastname"].GetString();
         info.userInfo.phoneNumber   = userField["number"].GetString();
-        info.userInfo.picture       = userField["photo"].GetString();
         info.userInfo.email         = userField["email"].GetString();
         info.userInfo.password      = userField["password"].GetString();
-        info.userInfo.name          = userField["name"].GetString();
+        info.userInfo.picture.load(QString::fromStdString(CONFIG_DIR) + '/' + info.userInfo.phoneNumber);
+
         reqs[info.date] = info;
     }
 
-     updateData(reqs);
+     emit updateData(reqs);
 }

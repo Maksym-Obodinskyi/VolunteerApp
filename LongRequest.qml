@@ -18,7 +18,7 @@ Popup {
 
     property alias title: title.text
     property alias description: desc.text
-    property alias photo: photo
+    property string photo: ""
     property alias name: name.text
     property alias lastName: lastName.text
     property alias phone: phone.text
@@ -130,6 +130,9 @@ Popup {
 
                 UserPhoto {
                     id: photo
+
+                    uri: root.photo
+
                     anchors {
                         top: parent.top
                         left: parent.left
@@ -138,8 +141,6 @@ Popup {
 
                 VText {
                     id: name
-
-                    text: root.name
 
                     anchors {
                         top: parent.top
@@ -185,5 +186,9 @@ Popup {
                 }
             }
         }
+    }
+
+    onPhoneChanged: {
+        root.photo = "file:///home/maksym/.VolunteerApp/" + root.phone + ".png"
     }
 }

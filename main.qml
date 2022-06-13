@@ -368,6 +368,8 @@ MapQuickItem {
                     UserPhoto {
                         id: userMenuPhoto
 
+                        uri: SessionManager.photo
+
                         anchors {
                             top: parent.top
                             left: parent.left
@@ -651,6 +653,11 @@ MapQuickItem {
         width: 400
         height: 600
         anchors.centerIn: parent
+        onEditAcc: {
+            createAcc.edit = true
+            createAccPopup.open()
+            settingsWindow.close()
+        }
     }
 
     AddRequestPopup {
@@ -680,6 +687,7 @@ MapQuickItem {
             onCreateAccount: {
                 signInPopup.close()
                 createAccPopup.open()
+                createAcc.edit = false
             }
         }
     }
@@ -690,11 +698,12 @@ MapQuickItem {
         modal: true
         closePolicy: Popup.CloseOnPressOutside
         background: null
-        width: 600
-        height: 460
         Overlay.modal: Rectangle {
             color: "#bb101010"
         }
+
+        width: 600
+        height: createAcc.edit ? 520 : 460
         contentItem: CreateAccWin {
             id: createAcc
             failedToCreate: false
@@ -702,6 +711,10 @@ MapQuickItem {
             onBack: {
                 createAccPopup.close()
                 signInPopup.open()
+            }
+
+            onClose: {
+                createAccPopup.close()
             }
         }
     }
