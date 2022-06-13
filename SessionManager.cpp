@@ -24,8 +24,6 @@ void SessionManager::onReadyRead()
 {
     TRACE();
     QByteArray datas = socket.readAll();
-    DEBUG("datas: {}", datas.toStdString());
-
     char comm;
 
     if (datas.startsWith('c')) {
@@ -92,7 +90,9 @@ void SessionManager::onReadyRead()
             GetRequestResponce resp;
             resp.deserialize(datas.constData() + 2);
             for(const auto & item : resp.requestsList) {
-                item.userInfo.picture.save(QString::fromStdString(ConfigManager::CONFIG_DIR) + '/' + item.userInfo.phoneNumber);
+                if (!item.userInfo.picture.isNull()) {
+                    item.userInfo.picture.save(QString::fromStdString(ConfigManager::CONFIG_DIR) + '/' + item.userInfo.phoneNumber);
+                }
                 data.append(QVariant::fromValue(item));
             }
 
@@ -131,7 +131,7 @@ void SessionManager::getRequests()
 {
     TRACE();
     MessageGetRequest msg;
-    msg.setFilter("Food");
+//    msg.setFilter("Food");
     socket.write(msg.serialize());
 }
 
@@ -300,7 +300,7 @@ QString SessionManager::getEmail()
 
 QString SessionManager::getPhoto()
 {
-    return QString("file://" + QString::fromStdString(ConfigManager::CONFIG_DIR) + '/' + _user.phoneNumber) ;
+    return QString("file://" + QString::fromStdString(ConfigManager::CONFIG_DIR) + '/' + _user.phoneNumber + ".png") ;
 }
 
 void SessionManager::editAccount(QString phone

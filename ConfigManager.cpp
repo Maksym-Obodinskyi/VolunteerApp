@@ -286,6 +286,7 @@ void ConfigManager::writeReq(const RequestInfo & req, std::string fileName)
 
 void ConfigManager::getReqs(std::string fileName)
 {
+    TRACE();
     std::map<int, RequestInfo> reqs;
     std::ifstream ifs(fileName);
     if (!ifs) {
@@ -346,7 +347,7 @@ void ConfigManager::getReqs(std::string fileName)
         info.description            = reqField["description"].GetString();
         info.title                  = reqField["title"].GetString();
         info.categories             = reqField["categories"].GetString();
-        info.date                   = reqField["date"].GetInt();
+        info.date                   = reqField["date"].GetInt64();
         info.userInfo.name          = userField["name"].GetString();
         info.userInfo.lastName      = userField["lastname"].GetString();
         info.userInfo.phoneNumber   = userField["number"].GetString();

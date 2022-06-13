@@ -2,10 +2,11 @@
 #define LOG_LEVEL _INFO_
 #include "Logger.h"
 #include "RequestInfo.h"
-
+#include <chrono>
 #include <QQmlEngine>
 
 RequestInfo::RequestInfo() : QObject(nullptr)
+  , date(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count())
 {
 
 }
@@ -19,7 +20,6 @@ RequestInfo::RequestInfo(const RequestInfo & req) : QObject(nullptr)
     description = req.description;
     title = req.title;
     categories = req.categories;
-    date = req.date;
     targetDate = req.targetDate;
     userInfo = req.userInfo;
 }
@@ -33,7 +33,6 @@ RequestInfo& RequestInfo::operator=(const RequestInfo & req)
     description = req.description;
     title = req.title;
     categories = req.categories;
-    date = req.date;
     targetDate = req.targetDate;
     userInfo = req.userInfo;
     return *this;
@@ -48,7 +47,6 @@ RequestInfo::RequestInfo(RequestInfo && req) : QObject(nullptr)
     description = std::move(req.description);
     title = std::move(req.title);
     categories = std::move(req.categories);
-    date = req.date;
     targetDate = req.targetDate;
     userInfo = std::move(req.userInfo);
 }
@@ -62,7 +60,6 @@ RequestInfo& RequestInfo::operator=(RequestInfo && req)
     description = std::move(req.description);
     title = std::move(req.title);
     categories = std::move(req.categories);
-    date = req.date;
     targetDate = req.targetDate;
     userInfo = std::move(req.userInfo);
     return *this;
@@ -217,12 +214,6 @@ void RequestInfo::setTitle(QString var)
 void RequestInfo::setCategories(QString var)
 {
     categories = var;
-
-}
-
-void RequestInfo::setDate(int var)
-{
-    date = var;
 
 }
 

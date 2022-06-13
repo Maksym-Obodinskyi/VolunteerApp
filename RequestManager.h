@@ -20,7 +20,6 @@ public:
                                     , QString lastName
                                     , QString email
                                     , QString phone
-                                    , QImage photo
                                     , double latitude
                                     , double longitude
                                     , QString title

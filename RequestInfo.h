@@ -72,7 +72,6 @@ public:
     void setDescription(QString var);
     void setTitle(QString var);
     void setCategories(QString var);
-    void setDate(int var);
     void setTargetDate(int var);
 ///////////////////////////////////////////////////////////////////
 

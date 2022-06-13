@@ -7,11 +7,11 @@ Rectangle {
 
     property alias genIntColor: root.color
 
-    property string photo: ""
     property string name: ""
     property string lastName: ""
     property string email: ""
     property string phone: ""
+    property string photo: ""
 
     property string title: ""
     property string description: ""
@@ -85,7 +85,7 @@ Rectangle {
                                           , root.lastName
                                           , root.email
                                           , root.phone
-                                          , root.photo
+//                                          , root.photo
                                           , root.latitude
                                           , root.longitude
                                           , root.title
@@ -121,5 +121,9 @@ Rectangle {
         onClicked: {
             root.openLongReq()
         }
+    }
+
+    onPhoneChanged: {
+        root.photo = "file:///home/maksym/.VolunteerApp/" + root.phone + ".png"
     }
 }

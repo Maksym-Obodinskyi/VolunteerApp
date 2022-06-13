@@ -22,7 +22,6 @@ void RequestManager::addToFavorites(QString name
                                     , QString lastName
                                     , QString email
                                     , QString phone
-                                    , QImage photo
                                     , double latitude
                                     , double longitude
                                     , QString title
@@ -35,7 +34,6 @@ void RequestManager::addToFavorites(QString name
     req.userInfo.lastName = lastName;
     req.userInfo.email = email;
     req.userInfo.phoneNumber = phone;
-    req.userInfo.picture = photo;
     req._location.E = latitude;
     req._location.N = longitude;
     req.title = title;
