@@ -23,7 +23,7 @@ Rectangle {
 
     Text {
         id: title
-        text: "Create Account"
+        text: root.edit ? "Edit Account" : "Create Account"
         height: 40
         width: parent.width
         anchors.top: parent.top
